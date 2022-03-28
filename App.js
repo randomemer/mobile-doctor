@@ -1,27 +1,56 @@
 import React, {Component} from 'react';
 import {
     Platform,
-    StyleSheet,
     Text,
     TextInput,
     View,
-    Button,
     PermissionsAndroid,
-    TouchableOpacity,
     TouchableHighlight,
+    TouchableOpacity,
     Image,
 } from 'react-native';
-import AudioRecorderPlayer, {
-    AVEncoderAudioQualityIOSType,
-    AVEncodingOption,
-    AudioEncoderAndroidType,
-    AudioSet,
-    AudioSourceAndroidType,
-} from 'react-native-audio-recorder-player';
-import RNFetchBlob from 'react-native-fetch-blob';
 import styles from './Styles';
+import {TabView, SceneMap} from 'react-native-tab-view';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
-(async () => {
+// Importing the screens
+import Home from './screens/home';
+import History from './screens/history';
+import SendDoc from './screens/send-doc';
+import HistoryDetails from './screens/history-details';
+import LoginView from './screens/login';
+
+// AWS APIs
+import Amplify, {Auth} from 'aws-amplify';
+import awsconfig from './src/aws-exports.js';
+Amplify.configure(awsconfig);
+
+async function signUp() {
+    try {
+        const {user} = await Auth.signUp({
+            username: 'pshashank569@gmail.com',
+            password: 'Shashank',
+            attributes: {
+                email: 'pshashank569@gmail.com', // optional
+                phone_number: '+919500062931', // optional - E.164 number convention
+                given_name: 'Shashank',
+                family_name: 'Pathipati',
+                birthdate: '',
+            },
+        });
+        console.log(user);
+    } catch (error) {
+        console.log('error signing up:', error);
+    }
+}
+
+// signUp();
+Text.defaultProps = {color: '#333'};
+
+(async function () {
     if (Platform.OS === 'android') {
         try {
             const grants = await PermissionsAndroid.requestMultiple([
@@ -40,9 +69,9 @@ import styles from './Styles';
                 grants['android.permission.RECORD_AUDIO'] ===
                     PermissionsAndroid.RESULTS.GRANTED
             ) {
-                console.log('Permissions granted');
+                console.log('permissions granted');
             } else {
-                console.log('All required permissions not granted');
+                console.log('permissions not granted');
                 return;
             }
         } catch (err) {
@@ -52,148 +81,74 @@ import styles from './Styles';
     }
 })();
 
-class LoginView extends Component {
+const HomeStack = createNativeStackNavigator();
+const HistoryStack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+class HomeStackScreen extends Component {
     constructor(props) {
         super(props);
-        this.userIcon = require('./assets/person.png');
-        this.pwdIcon = require('./assets/lock-closed.png');
-        this.heartIcon = require('./assets/heart-icon.png');
-        console.log(this.props);
-    }
-
-    handleLogin() {
-        console.log('Trying to login...');
-        this.props.login();
     }
 
     render() {
         return (
-            <View style={styles.loginContainer}>
-                <View style={styles.loginTopArea}>
-                    <Image style={styles.heartIcon} source={this.heartIcon} />
-                    <View style={styles.inputFields}>
-                        <View style={styles.loginRow}>
-                            <Image
-                                style={styles.loginIcons}
-                                source={this.userIcon}
-                            />
-                            <TextInput
-                                textContentType="username"
-                                placeholder="Phone Number"
-                                placeholderTextColor={'grey'}
-                                style={styles.loginInput}></TextInput>
-                        </View>
-                        <View style={styles.loginRow}>
-                            <Image
-                                style={styles.loginIcons}
-                                source={this.pwdIcon}
-                            />
-                            <TextInput
-                                textContentType="password"
-                                placeholder="Password"
-                                secureTextEntry={true}
-                                placeholderTextColor={'grey'}
-                                style={styles.loginInput}></TextInput>
-                        </View>
-                    </View>
-                </View>
-                <TouchableHighlight
-                    onPress={() => this.handleLogin()}
-                    style={styles.loginButton}>
-                    <Text style={styles.loginButtonText}>LOGIN</Text>
-                </TouchableHighlight>
-            </View>
+            <HomeStack.Navigator>
+                <HomeStack.Screen
+                    name="record-screen"
+                    component={Home}
+                    options={{headerShown: false}}></HomeStack.Screen>
+                <HomeStack.Screen
+                    name="send-screen"
+                    component={SendDoc}
+                    options={{
+                        title: 'Pick Your Doc',
+                        headerStyle: {
+                            backgroundColor: '#ff5456',
+                        },
+                        headerTitleStyle: {color: '#fff'},
+                    }}></HomeStack.Screen>
+            </HomeStack.Navigator>
         );
     }
 }
 
-class RecordView extends Component {
+class HistoryStackScreen extends Component {
     constructor(props) {
         super(props);
-
-        this.state = {isRecording: false, recordTime: '00:00:00'};
-
-        this.audioRecorderPlayer = new AudioRecorderPlayer();
-        this.audioRecorderPlayer.setSubscriptionDuration(0.09);
-        this.micIcon = require('./assets/mic-outline.png');
-        this.stopIcon = require('./assets/stop-circle-outline.png');
     }
 
     render() {
-        const btnCallback = this.state.isRecording
-            ? () => this.onStopRecord()
-            : () => this.onStartRecord();
-        const btnIcon = this.state.isRecording ? this.stopIcon : this.micIcon;
-
         return (
-            <View style={styles.container}>
-                <View style={styles.recordArea}>
-                    <Text style={styles.timer}>{this.state.recordTime}</Text>
-                    <TouchableOpacity
-                        style={styles.recordButton}
-                        onPress={btnCallback}>
-                        <Image
-                            source={btnIcon}
-                            style={styles.recordButtonIcon}
-                        />
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <HistoryStack.Navigator>
+                <HistoryStack.Screen
+                    name="history-screen"
+                    component={History}
+                    options={{
+                        title: 'Previous Interactions',
+                        headerStyle: {
+                            backgroundColor: '#ff5456',
+                        },
+                        headerTitleStyle: {color: '#fff'},
+                    }}></HistoryStack.Screen>
+                <HistoryStack.Screen
+                    name="details-screen"
+                    component={HistoryDetails}
+                    options={{
+                        title: 'Interaction Info',
+                        headerStyle: {
+                            backgroundColor: '#ff5456',
+                        },
+                        headerTitleStyle: {color: '#fff'},
+                    }}></HistoryStack.Screen>
+            </HistoryStack.Navigator>
         );
     }
-
-    onStartRecord = async () => {
-        this.setState({isRecording: true});
-        console.log('Started Recording');
-
-        const musicFolder = RNFetchBlob.fs.dirs.MusicDir;
-        // const cacheFolder = RNFetchBlob.fs.dirs.CacheDir;
-        const path = musicFolder + '/recorde.mp3';
-        const audioSet = {
-            AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
-            AudioSourceAndroid: AudioSourceAndroidType.MIC,
-            AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
-            AVNumberOfChannelsKeyIOS: 2,
-            AVFormatIDKeyIOS: AVEncodingOption.aac,
-        };
-        console.log('audioSet', audioSet);
-        try {
-            const uri = await this.audioRecorderPlayer.startRecorder(
-                path,
-                audioSet,
-            );
-            console.log(`uri: ${uri}`);
-            // Update timer
-            this.audioRecorderPlayer.addRecordBackListener(event => {
-                this.setState({
-                    recordTime: this.audioRecorderPlayer.mmssss(
-                        event.currentPosition,
-                    ),
-                });
-            });
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    onStopRecord = async () => {
-        this.setState({isRecording: false});
-        console.log('Stopped Recording');
-        try {
-            const result = await this.audioRecorderPlayer.stopRecorder();
-            this.audioRecorderPlayer.removeRecordBackListener;
-            console.log(result);
-        } catch (error) {
-            console.log(error);
-        }
-    };
 }
 
 class App extends Component {
     constructor(props) {
         super(props);
-
-        this.state = {isLogged: false};
+        this.state = {isLogged: true};
     }
 
     login() {
@@ -202,12 +157,54 @@ class App extends Component {
 
     render() {
         const screen = this.state.isLogged ? (
-            <RecordView />
+            <NavigationContainer>
+                <Tab.Navigator
+                    initialRouteName="Home"
+                    screenOptions={({route}) => ({
+                        tabBarIcon: ({focused, color, size}) => {
+                            let iconName;
+
+                            if (route.name === 'Home') {
+                                iconName = focused ? 'home' : 'home-outline';
+                            } else if (route.name === 'History') {
+                                iconName = focused ? 'time' : 'time-outline';
+                            }
+
+                            return (
+                                <Icon
+                                    name={iconName}
+                                    size={size}
+                                    color={color}
+                                />
+                            );
+                        },
+                        tabBarActiveTintColor: '#ff5456',
+                        tabBarInactiveTintColor: 'gray',
+                        tabBarShowLabel: false,
+                        tabBarStyle: {},
+                        headerShown:
+                            route.name in {Home: undefined} ? false : false,
+                    })}>
+                    <Tab.Screen
+                        name="Home"
+                        component={HomeStackScreen}></Tab.Screen>
+                    <Tab.Screen
+                        name="History"
+                        component={HistoryStackScreen}
+                        options={{
+                            title: 'Previous Interactions',
+                            headerStyle: {
+                                backgroundColor: '#ff5456',
+                            },
+                            headerTitleStyle: {color: '#fff'},
+                        }}></Tab.Screen>
+                </Tab.Navigator>
+            </NavigationContainer>
         ) : (
             <LoginView login={() => this.login()} />
         );
 
-        return <View style={styles.container}>{screen}</View>;
+        return <View style={styles.appContainer}>{screen}</View>;
     }
 }
 
