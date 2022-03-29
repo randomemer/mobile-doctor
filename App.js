@@ -1,17 +1,11 @@
+// Components
 import React, {Component} from 'react';
-import {
-    Platform,
-    Text,
-    TextInput,
-    View,
-    PermissionsAndroid,
-    TouchableHighlight,
-    TouchableOpacity,
-    Image,
-} from 'react-native';
+import {Platform, Text, View, PermissionsAndroid} from 'react-native';
+import SimpleToast from 'react-native-simple-toast';
 import styles from './Styles';
-import {TabView, SceneMap} from 'react-native-tab-view';
 import Icon from 'react-native-vector-icons/Ionicons';
+
+// Navigation
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -28,27 +22,10 @@ import Amplify, {Auth} from 'aws-amplify';
 import awsconfig from './src/aws-exports.js';
 Amplify.configure(awsconfig);
 
-async function signUp() {
-    try {
-        const {user} = await Auth.signUp({
-            username: 'pshashank569@gmail.com',
-            password: 'Shashank',
-            attributes: {
-                email: 'pshashank569@gmail.com', // optional
-                phone_number: '+919500062931', // optional - E.164 number convention
-                given_name: 'Shashank',
-                family_name: 'Pathipati',
-                birthdate: '',
-            },
-        });
-        console.log(user);
-    } catch (error) {
-        console.log('error signing up:', error);
-    }
-}
-
-// signUp();
 Text.defaultProps = {color: '#333'};
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 (async function () {
     if (Platform.OS === 'android') {
@@ -69,7 +46,7 @@ Text.defaultProps = {color: '#333'};
                 grants['android.permission.RECORD_AUDIO'] ===
                     PermissionsAndroid.RESULTS.GRANTED
             ) {
-                console.log('permissions granted');
+                SimpleToast.show('Permissions Granted');
             } else {
                 console.log('permissions not granted');
                 return;
@@ -148,18 +125,59 @@ class HistoryStackScreen extends Component {
 class App extends Component {
     constructor(props) {
         super(props);
-        this.state = {isLogged: false};
+        this.state = {isLogged: false, signUpInitiated: false, loading: false};
     }
 
-    login(loginFields) {
-        console.log(loginFields);
-        this.setState({isLogged: true});
-    }
+    verifyOTP = async otpData => {
+        console.log(otpData);
+        try {
+            this.setState({loading: true});
+            const message = await Auth.confirmSignUp(otpData.user, otpData.otp);
+            console.log(message);
+            this.setState({isLogged: true});
+            SimpleToast.show('Account Created Successfully');
+        } catch (error) {
+            alert(error.message);
+        }
+        this.setState({loading: false});
+    };
 
-    signUp(signUpData) {
-        console.log(signUpData);
-        this.setState({isLogged: true});
-    }
+    login = async loginFields => {
+        try {
+            this.setState({loading: true});
+            const res = await Auth.signIn(
+                loginFields.userText,
+                loginFields.pwdText,
+            );
+            console.log(res);
+            this.setState({isLogged: true});
+            SimpleToast.show('Logged In Successfully');
+        } catch (error) {
+            alert(error.message);
+        }
+        this.setState({loading: false});
+    };
+
+    signUp = async signUpData => {
+        try {
+            this.setState({loading: true});
+            const {user} = await Auth.signUp({
+                username: signUpData.phone,
+                password: signUpData.passwd,
+                attributes: {
+                    email: signUpData.email,
+                    phone_number: signUpData.phone, // - E.164 number convention
+                    given_name: signUpData.firstName,
+                    family_name: signUpData.lastName,
+                },
+            });
+            console.log(user);
+            this.setState({signUpInitiated: true});
+        } catch (error) {
+            alert(error.message);
+        }
+        this.setState({loading: false});
+    };
 
     render() {
         const screen = this.state.isLogged ? (
@@ -210,6 +228,9 @@ class App extends Component {
             <LoginView
                 login={data => this.login(data)}
                 signUp={data => this.signUp(data)}
+                otpCallback={data => this.verifyOTP(data)}
+                signUpInitiated={this.state.signUpInitiated}
+                isLoading={this.state.loading}
             />
         );
 

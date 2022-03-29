@@ -4,8 +4,8 @@ import {
     Text,
     TextInput,
     View,
-    PermissionsAndroid,
-    TouchableHighlight,
+    Modal,
+    ActivityIndicator,
     TouchableOpacity,
     Image,
 } from 'react-native';
@@ -66,60 +66,86 @@ class SignUpPane extends Component {
             email: '',
             phone: '',
             passwd: '',
+            otp: '',
         };
     }
 
     render() {
+        const fields = !this.props.signUpInitiated ? (
+            <View style={styles.inputFields}>
+                <TextInput
+                    placeholder="First Name"
+                    placeholderTextColor={'#aaa'}
+                    style={styles.loginInput}
+                    onChangeText={text => this.setState({firstName: text})}
+                    returnKeyType={'next'}
+                />
+                <TextInput
+                    placeholder="Last Name"
+                    placeholderTextColor={'#aaa'}
+                    style={styles.loginInput}
+                    onChangeText={text => this.setState({lastName: text})}
+                    returnKeyType={'next'}
+                />
+
+                <TextInput
+                    placeholder="E-Mail"
+                    placeholderTextColor={'#aaa'}
+                    style={styles.loginInput}
+                    onChangeText={text => this.setState({email: text})}
+                    returnKeyType={'next'}
+                />
+
+                <TextInput
+                    placeholder="Phone Number"
+                    placeholderTextColor={'#aaa'}
+                    style={styles.loginInput}
+                    onChangeText={text => this.setState({phone: text})}
+                    returnKeyType={'next'}
+                />
+
+                <TextInput
+                    placeholder="Password"
+                    placeholderTextColor={'#aaa'}
+                    secureTextEntry={true}
+                    onChangeText={text => this.setState({passwd: text})}
+                    onSubmitEditing={() =>
+                        this.props.signUpCallback(this.state)
+                    }
+                    style={styles.loginInput}
+                />
+            </View>
+        ) : (
+            <TextInput
+                placeholder="Enter OTP"
+                placeholderTextColor={'#aaa'}
+                onChangeText={text => this.setState({otp: text})}
+                style={styles.loginInput}
+            />
+        );
+        const data = {
+            firstName: this.state.firstName,
+            lastName: this.state.lastName,
+            email: this.state.email,
+            phone: this.state.phone,
+            passwd: this.state.passwd,
+        };
+        const btnCallback = !this.props.signUpInitiated
+            ? () => this.props.signUpCallback(data)
+            : () =>
+                  this.props.otpCallback({
+                      user: data.phone,
+                      otp: this.state.otp,
+                  });
+        const btnName = !this.props.signUpInitiated ? 'SIGN UP' : 'VERIFY';
         return (
             <View style={styles.loginArea}>
-                <View style={styles.inputFields}>
-                    <TextInput
-                        placeholder="First Name"
-                        placeholderTextColor={'#aaa'}
-                        style={styles.loginInput}
-                        onChangeText={text => this.setState({firstName: text})}
-                        returnKeyType={'next'}
-                    />
-                    <TextInput
-                        placeholder="Last Name"
-                        placeholderTextColor={'#aaa'}
-                        style={styles.loginInput}
-                        onChangeText={text => this.setState({lastName: text})}
-                        returnKeyType={'next'}
-                    />
-
-                    <TextInput
-                        placeholder="E-Mail"
-                        placeholderTextColor={'#aaa'}
-                        style={styles.loginInput}
-                        onChangeText={text => this.setState({email: text})}
-                        returnKeyType={'next'}
-                    />
-
-                    <TextInput
-                        placeholder="Phone Number"
-                        placeholderTextColor={'#aaa'}
-                        style={styles.loginInput}
-                        onChangeText={text => this.setState({phone: text})}
-                        returnKeyType={'next'}
-                    />
-
-                    <TextInput
-                        placeholder="Password"
-                        placeholderTextColor={'#aaa'}
-                        secureTextEntry={true}
-                        onChangeText={text => this.setState({passwd: text})}
-                        onSubmitEditing={() =>
-                            this.props.signUpCallback(this.state)
-                        }
-                        style={styles.loginInput}
-                    />
-                </View>
+                {fields}
                 <TouchableOpacity
-                    activeOpacity={0.6}
-                    onPress={() => this.props.signUpCallback(this.state)}
+                    activeOpacity={0.5}
+                    onPress={btnCallback}
                     style={styles.loginButton}>
-                    <Text style={styles.loginButtonText}>SIGN UP</Text>
+                    <Text style={styles.loginButtonText}>{btnName}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -140,10 +166,55 @@ class LoginView extends Component {
     }
 
     handleLogin = loginFields => {
+        console.log(loginFields);
+
+        // Check all fields are filled
+        const valid = Object.entries(loginFields).every(pair => pair[1] !== '');
+        if (!valid) {
+            alert('Enter all fields');
+            return;
+        }
+
+        // Check if phone regex is correct
+        const phoneReg = /^\+[1-9]\d{1,14}$/;
+        if (!phoneReg.test(loginFields.userText)) {
+            alert('Invalid Phone Number');
+            return;
+        }
         this.props.login(loginFields);
     };
 
     handleSignUp = signUpData => {
+        console.log(signUpData);
+        // Check all fields are filled
+        const valid = Object.entries(signUpData).every(pair => pair[1] !== '');
+        if (!valid) {
+            alert('Enter all fields');
+            return;
+        }
+
+        //Check valid names
+        const nameReg = /^[a-zA-Z ]+$/;
+        if (
+            !nameReg.test(signUpData.firstName) ||
+            !nameReg.test(signUpData.lastName)
+        ) {
+            alert('Invalid Name');
+        }
+
+        // Check if email regex is correct
+        const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+        if (!emailReg.test(signUpData.email)) {
+            alert('Invalid Email');
+            return;
+        }
+
+        // Check if phone regex is correct
+        const phoneReg = /^\+[1-9]\d{1,14}$/;
+        if (!phoneReg.test(signUpData.phone)) {
+            alert('Invalid Phone Number');
+            return;
+        }
         this.props.signUp(signUpData);
     };
 
@@ -152,7 +223,13 @@ class LoginView extends Component {
             if (route.key === 'login') {
                 return <LoginPane loginCallback={this.handleLogin} />;
             } else if (route.key === 'sign-up') {
-                return <SignUpPane signUpCallback={this.handleSignUp} />;
+                return (
+                    <SignUpPane
+                        signUpCallback={this.handleSignUp}
+                        otpCallback={this.props.otpCallback}
+                        signUpInitiated={this.props.signUpInitiated}
+                    />
+                );
             }
         };
 
@@ -162,6 +239,11 @@ class LoginView extends Component {
 
         return (
             <View style={styles.loginContainer}>
+                <Modal transparent={true} visible={this.props.isLoading}>
+                    <View style={styles.modalBoxWrapper}>
+                        <ActivityIndicator size={'large'} color={'limegreen'} />
+                    </View>
+                </Modal>
                 <View style={styles.loginWrapper}>
                     <Image style={styles.heartIcon} source={this.heartIcon} />
                     <TabView

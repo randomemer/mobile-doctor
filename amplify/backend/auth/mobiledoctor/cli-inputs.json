@@ -3,7 +3,7 @@
   "cognitoConfig": {
     "identityPoolName": "testAuthIdentityPool",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "mobileda234759",
+    "resourceNameTruncated": "mobile0490a6b3",
     "userPoolName": "mobiledoctor",
     "autoVerifiedAttributes": [
       "phone_number"
@@ -13,7 +13,7 @@
       "SMS Text Message"
     ],
     "smsAuthenticationMessage": "Your authentication code is {####}",
-    "smsVerificationMessage": "Your Verification code for your request: {####}. Do not share with anyone.",
+    "smsVerificationMessage": "Verification code: {####}",
     "emailVerificationSubject": "Your verification code",
     "emailVerificationMessage": "Your verification code is {####}",
     "defaultPasswordPolicy": false,
@@ -26,22 +26,20 @@
       "given_name",
       "family_name",
       "email",
-      "phone_number",
-      "birthdate"
+      "phone_number"
     ],
     "aliasAttributes": [],
     "userpoolClientGenerateSecret": false,
     "userpoolClientRefreshTokenValidity": 30,
     "userpoolClientWriteAttributes": [],
     "userpoolClientReadAttributes": [],
-    "userpoolClientLambdaRole": "mobileda234759_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "mobile0490a6b3_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "da234759",
+    "sharedId": "0490a6b3",
     "resourceName": "mobiledoctor",
     "authSelections": "identityPoolAndUserPool",
     "serviceName": "Cognito",
     "usernameAttributes": [
-      "email",
       "phone_number"
     ],
     "useDefault": "manual",

@@ -8,14 +8,13 @@
       "frontendAuthConfig": {
         "socialProviders": [],
         "usernameAttributes": [
-          "EMAIL"
+          "PHONE_NUMBER"
         ],
         "signupAttributes": [
           "GIVEN_NAME",
           "FAMILY_NAME",
           "EMAIL",
-          "PHONE_NUMBER",
-          "BIRTHDATE"
+          "PHONE_NUMBER"
         ],
         "passwordProtectionSettings": {
           "passwordPolicyMinLength": 8,
