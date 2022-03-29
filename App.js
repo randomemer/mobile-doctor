@@ -148,10 +148,16 @@ class HistoryStackScreen extends Component {
 class App extends Component {
     constructor(props) {
         super(props);
-        this.state = {isLogged: true};
+        this.state = {isLogged: false};
     }
 
-    login() {
+    login(loginFields) {
+        console.log(loginFields);
+        this.setState({isLogged: true});
+    }
+
+    signUp(signUpData) {
+        console.log(signUpData);
         this.setState({isLogged: true});
     }
 
@@ -201,7 +207,10 @@ class App extends Component {
                 </Tab.Navigator>
             </NavigationContainer>
         ) : (
-            <LoginView login={() => this.login()} />
+            <LoginView
+                login={data => this.login(data)}
+                signUp={data => this.signUp(data)}
+            />
         );
 
         return <View style={styles.appContainer}>{screen}</View>;

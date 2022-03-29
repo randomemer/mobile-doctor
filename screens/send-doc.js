@@ -1,5 +1,13 @@
 import React, {Component} from 'react';
-import {Text, View, TouchableHighlight, FlatList, Modal} from 'react-native';
+import {
+    Text,
+    View,
+    TouchableHighlight,
+    FlatList,
+    Modal,
+    Alert,
+    ActivityIndicator,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../Styles';
@@ -8,6 +16,10 @@ import {useNavigation} from '@react-navigation/native';
 const docs = [];
 for (let i = 0; i < 10; i++) {
     docs.push({title: 'Example Doctor', work: 'Brief Description'});
+}
+
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 class SendDoc extends Component {
@@ -19,16 +31,37 @@ class SendDoc extends Component {
         };
     }
 
-    handleSend(index) {
+    handleSend = async index => {
         this.setState({modalVisible: true});
-    }
-
-    closeModal() {
+        try {
+            // await response to cloud
+            await timeout(1500);
+            Alert.alert(
+                'Successfully Sent!',
+                'Your doctor will respond to you soon.',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => {
+                            this.props.navigation.navigate('record-screen', {
+                                test: 'Hello from another world',
+                            });
+                        },
+                    },
+                ],
+                {
+                    onDismiss: () => {
+                        this.props.navigation.navigate('record-screen', {
+                            test: 'Hello from another world',
+                        });
+                    },
+                },
+            );
+        } catch (error) {
+            console.log(error);
+        }
         this.setState({modalVisible: false});
-        this.props.navigation.navigate('record-screen', {
-            test: 'Hello from another world',
-        });
-    }
+    };
 
     card(props) {
         return (
@@ -53,26 +86,9 @@ class SendDoc extends Component {
 
         return (
             <SafeAreaView style={styles.docContainer}>
-                <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={this.state.modalVisible}
-                    onRequestClose={this.closeModal.bind(this)}>
+                <Modal transparent={true} visible={this.state.modalVisible}>
                     <View style={styles.modalBoxWrapper}>
-                        <View style={styles.sentDialogBox}>
-                            <TouchableHighlight
-                                underlayColor={'#eee'}
-                                onPress={() => this.closeModal()}
-                                style={styles.modalClose}>
-                                <Icon
-                                    name="close"
-                                    size={30}
-                                    color={'#333'}></Icon>
-                            </TouchableHighlight>
-                            <Text style={styles.modalText}>
-                                Successfully Sent!
-                            </Text>
-                        </View>
+                        <ActivityIndicator size={'large'} color={'limegreen'} />
                     </View>
                 </Modal>
                 <FlatList
