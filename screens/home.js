@@ -1,25 +1,62 @@
 import React, {Component} from 'react';
 import AudioRecorderPlayer, {
+    AudioSet,
     AVEncoderAudioQualityIOSType,
     AVEncodingOption,
     AudioEncoderAndroidType,
-    AudioSet,
     AudioSourceAndroidType,
 } from 'react-native-audio-recorder-player';
-import {Text, View, TouchableHighlight} from 'react-native';
+import {
+    Text,
+    View,
+    TouchableHighlight,
+    Platform,
+    PermissionsAndroid,
+} from 'react-native';
+import SimpleToast from 'react-native-simple-toast';
 import styles from '../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import reactNativeFetchBlob from 'react-native-fetch-blob';
 
+async function askPerms() {
+    if (Platform.OS === 'android') {
+        try {
+            const grants = await PermissionsAndroid.requestMultiple([
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+            ]);
+
+            // console.log('write external stroage', grants);
+
+            if (
+                grants['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+                    PermissionsAndroid.RESULTS.GRANTED &&
+                grants['android.permission.READ_EXTERNAL_STORAGE'] ===
+                    PermissionsAndroid.RESULTS.GRANTED &&
+                grants['android.permission.RECORD_AUDIO'] ===
+                    PermissionsAndroid.RESULTS.GRANTED
+            ) {
+                SimpleToast.show('Permissions Granted');
+            } else {
+                console.log('permissions not granted');
+                return;
+            }
+        } catch (err) {
+            console.warn(err);
+            return;
+        }
+    }
+}
+
 function SendButton(props) {
     const navigation = useNavigation();
-
     return (
         <TouchableHighlight
             style={styles.sendToDocButton}
-            onPress={() => navigation.navigate('send-screen')}
+            onPress={() => navigation.navigate('send-screen', props.audiofile)}
             underlayColor={'#007e97'}>
             <Icon name="send" size={24} color={'white'} />
         </TouchableHighlight>
@@ -32,7 +69,7 @@ class Home extends Component {
 
         this.state = {
             isRecording: false,
-            finishedRecording: true,
+            finishedRecording: false,
             recordTimeString: '00:00:00',
             isPlaying: false,
             playerActive: false,
@@ -40,9 +77,11 @@ class Home extends Component {
             audioLength: 0,
             audioPath: '',
         };
-        this.props = props;
+        this.initialState = this.state;
         this.audioRecorderPlayer = new AudioRecorderPlayer();
         this.audioRecorderPlayer.setSubscriptionDuration(0.09);
+
+        askPerms();
     }
 
     Player(props) {
@@ -153,14 +192,10 @@ class Home extends Component {
                         state={this.state}
                         parent={this}
                     />
-                    <SendButton func={() => this.sendToDoc()} />
+                    <SendButton audiofile={this.state.audioPath} />
                 </View>
             </View>
         );
-    }
-
-    sendToDoc() {
-        console.log('Sending to Doc...');
     }
 
     onStartRecord = async () => {
@@ -168,19 +203,23 @@ class Home extends Component {
         console.log('Started Recording');
 
         const musicFolder = reactNativeFetchBlob.fs.dirs.MusicDir;
-        // const musicFolder = RNFetchBlob.MusicDir;
-        // const cacheFolder = RNFetchBlob.fs.dirs.CacheDir;
         const curDate = new Date();
         const hash = `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${curDate.getMonth()}.${curDate.getFullYear()}`;
-        const path = `${musicFolder}/r-${hash}.mp3`;
+        const path = `${musicFolder}/r-${hash}.wav`;
         console.log(path);
         const audioSet = {
+            // Android
             AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
             AudioSourceAndroid: AudioSourceAndroidType.MIC,
+            AudioSamplingRateAndroid: 8000,
+            AudioEncodingBitRateAndroid: 16,
+            // IOS
             AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
-            AVNumberOfChannelsKeyIOS: 2,
+            AVNumberOfChannelsKeyIOS: 1,
             AVFormatIDKeyIOS: AVEncodingOption.aac,
+            AVSampleRateKeyIOS: 8000,
         };
+        console.log(audioSet);
         try {
             const uri = await this.audioRecorderPlayer.startRecorder(
                 path,
@@ -218,8 +257,7 @@ class Home extends Component {
         try {
             this.setState({isPlaying: true, playerActive: true});
             const res = await this.audioRecorderPlayer.startPlayer(
-                reactNativeFetchBlob.fs.dirs.MusicDir +
-                    '/recording - 19.1.21 27.2.2022.mp3',
+                this.state.audioPath,
             );
             console.log(res);
             this.audioRecorderPlayer.addPlayBackListener(event => {
@@ -273,10 +311,8 @@ class Home extends Component {
                 console.log('File does not exist.');
                 return;
             }
-            const temp = await reactNativeFetchBlob.fs.unlink(
-                this.state.audioPath,
-            );
-            this.setState({audioPath: '', finishedRecording: false});
+            await reactNativeFetchBlob.fs.unlink(this.state.audioPath);
+            this.setState(this.initialState);
         } catch (error) {
             console.log(error);
         }

@@ -1,6 +1,6 @@
 export type AmplifyDependentResourcesAttributes = {
     "auth": {
-        "mobiledoctor": {
+        "mobiledoctorapp": {
             "IdentityPoolId": "string",
             "IdentityPoolName": "string",
             "UserPoolId": "string",
@@ -9,6 +9,12 @@ export type AmplifyDependentResourcesAttributes = {
             "AppClientIDWeb": "string",
             "AppClientID": "string",
             "CreatedSNSRole": "string"
+        }
+    },
+    "storage": {
+        "s3mobiledoctorappstorage": {
+            "BucketName": "string",
+            "Region": "string"
         }
     }
 }

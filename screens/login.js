@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import styles from '../Styles';
 import {TabView} from 'react-native-tab-view';
-import Icon from 'react-native-vector-icons/Ionicons';
 
 class LoginPane extends Component {
     constructor(props) {
@@ -24,7 +23,7 @@ class LoginPane extends Component {
             <View style={styles.loginArea}>
                 <View style={styles.inputFields}>
                     <TextInput
-                        placeholder="Phone Number"
+                        placeholder="Email"
                         placeholderTextColor={'#aaa'}
                         style={styles.loginInput}
                         onChangeText={text => this.setState({userText: text})}
@@ -134,7 +133,7 @@ class SignUpPane extends Component {
             ? () => this.props.signUpCallback(data)
             : () =>
                   this.props.otpCallback({
-                      user: data.phone,
+                      user: data.email,
                       otp: this.state.otp,
                   });
         const btnName = !this.props.signUpInitiated ? 'SIGN UP' : 'VERIFY';
@@ -175,10 +174,10 @@ class LoginView extends Component {
             return;
         }
 
-        // Check if phone regex is correct
-        const phoneReg = /^\+[1-9]\d{1,14}$/;
-        if (!phoneReg.test(loginFields.userText)) {
-            alert('Invalid Phone Number');
+        // Check if email regex is correct
+        const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+        if (!emailReg.test(loginFields.userText)) {
+            alert('Invalid Email');
             return;
         }
         this.props.login(loginFields);
@@ -186,8 +185,10 @@ class LoginView extends Component {
 
     handleSignUp = signUpData => {
         console.log(signUpData);
-        // Check all fields are filled
-        const valid = Object.entries(signUpData).every(pair => pair[1] !== '');
+        // Check all fields except otp are filled
+        const valid = Object.entries(signUpData).every(
+            pair => pair[0] === 'otp' || pair[1] !== '',
+        );
         if (!valid) {
             alert('Enter all fields');
             return;

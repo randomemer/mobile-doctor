@@ -3,23 +3,25 @@
   "cognitoConfig": {
     "identityPoolName": "testAuthIdentityPool",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "mobile0490a6b3",
-    "userPoolName": "mobiledoctor",
+    "resourceNameTruncated": "mobilebbdc6714",
+    "userPoolName": "mobiledoctorapp",
     "autoVerifiedAttributes": [
-      "phone_number"
+      "email"
     ],
     "mfaConfiguration": "OFF",
     "mfaTypes": [
       "SMS Text Message"
     ],
     "smsAuthenticationMessage": "Your authentication code is {####}",
-    "smsVerificationMessage": "Verification code: {####}",
-    "emailVerificationSubject": "Your verification code",
-    "emailVerificationMessage": "Your verification code is {####}",
+    "smsVerificationMessage": "Your verification code is {####}",
+    "emailVerificationSubject": "Verification code: {####}",
+    "emailVerificationMessage": "Verification code: {####}",
     "defaultPasswordPolicy": false,
     "passwordPolicyMinLength": 8,
     "passwordPolicyCharacters": [
       "Requires Lowercase",
+      "Requires Numbers",
+      "Requires Symbols",
       "Requires Uppercase"
     ],
     "requiredAttributes": [
@@ -33,14 +35,14 @@
     "userpoolClientRefreshTokenValidity": 30,
     "userpoolClientWriteAttributes": [],
     "userpoolClientReadAttributes": [],
-    "userpoolClientLambdaRole": "mobile0490a6b3_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "mobilebbdc6714_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "0490a6b3",
-    "resourceName": "mobiledoctor",
+    "sharedId": "bbdc6714",
+    "resourceName": "mobiledoctorapp",
     "authSelections": "identityPoolAndUserPool",
     "serviceName": "Cognito",
     "usernameAttributes": [
-      "phone_number"
+      "email"
     ],
     "useDefault": "manual",
     "userPoolGroups": false,

@@ -1,6 +1,6 @@
 // Components
 import React, {Component} from 'react';
-import {Platform, Text, View, PermissionsAndroid} from 'react-native';
+import {Image, Text, View} from 'react-native';
 import SimpleToast from 'react-native-simple-toast';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -19,44 +19,10 @@ import LoginView from './screens/login';
 
 // AWS APIs
 import Amplify, {Auth} from 'aws-amplify';
-import awsconfig from './src/aws-exports.js';
+import awsconfig from './aws-exports.js';
 Amplify.configure(awsconfig);
 
 Text.defaultProps = {color: '#333'};
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-(async function () {
-    if (Platform.OS === 'android') {
-        try {
-            const grants = await PermissionsAndroid.requestMultiple([
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-                PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-            ]);
-
-            // console.log('write external stroage', grants);
-
-            if (
-                grants['android.permission.WRITE_EXTERNAL_STORAGE'] ===
-                    PermissionsAndroid.RESULTS.GRANTED &&
-                grants['android.permission.READ_EXTERNAL_STORAGE'] ===
-                    PermissionsAndroid.RESULTS.GRANTED &&
-                grants['android.permission.RECORD_AUDIO'] ===
-                    PermissionsAndroid.RESULTS.GRANTED
-            ) {
-                SimpleToast.show('Permissions Granted');
-            } else {
-                console.log('permissions not granted');
-                return;
-            }
-        } catch (err) {
-            console.warn(err);
-            return;
-        }
-    }
-})();
 
 const HomeStack = createNativeStackNavigator();
 const HistoryStack = createNativeStackNavigator();
@@ -125,11 +91,14 @@ class HistoryStackScreen extends Component {
 class App extends Component {
     constructor(props) {
         super(props);
-        this.state = {isLogged: false, signUpInitiated: false, loading: false};
+        this.state = {
+            isLogged: this.props.prelogged,
+            signUpInitiated: false,
+            loading: false,
+        };
     }
 
     verifyOTP = async otpData => {
-        console.log(otpData);
         try {
             this.setState({loading: true});
             const message = await Auth.confirmSignUp(otpData.user, otpData.otp);
@@ -137,7 +106,8 @@ class App extends Component {
             this.setState({isLogged: true});
             SimpleToast.show('Account Created Successfully');
         } catch (error) {
-            alert(error.message);
+            // alert(error.message);
+            alert(error);
         }
         this.setState({loading: false});
     };
@@ -149,7 +119,7 @@ class App extends Component {
                 loginFields.userText,
                 loginFields.pwdText,
             );
-            console.log(res);
+            console.log('res: ', res);
             this.setState({isLogged: true});
             SimpleToast.show('Logged In Successfully');
         } catch (error) {
@@ -162,7 +132,7 @@ class App extends Component {
         try {
             this.setState({loading: true});
             const {user} = await Auth.signUp({
-                username: signUpData.phone,
+                username: signUpData.email,
                 password: signUpData.passwd,
                 attributes: {
                     email: signUpData.email,
@@ -238,4 +208,39 @@ class App extends Component {
     }
 }
 
-export default App;
+class AppWrapper extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {loaded: false, prelogged: false};
+        this.heartIcon = require('./assets/heart-icon.png');
+        this.getLastUser();
+    }
+
+    getLastUser = async () => {
+        try {
+            const {attributes} = await Auth.currentAuthenticatedUser();
+            const session = await Auth.currentSession();
+            console.log(session);
+            this.setState({prelogged: true});
+        } catch (error) {
+            console.log(error, typeof error);
+        }
+        this.setState({loaded: true});
+    };
+
+    render() {
+        const curState = this.state.loaded ? (
+            <App prelogged={this.state.prelogged} />
+        ) : (
+            <View style={styles.loadingScreen}>
+                <Image style={styles.heartIcon} source={this.heartIcon} />
+            </View>
+        );
+
+        return curState;
+    }
+}
+
+// export default App;
+export default AppWrapper;

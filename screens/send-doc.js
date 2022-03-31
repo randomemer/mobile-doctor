@@ -8,18 +8,17 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
+import SimpleToast from 'react-native-simple-toast';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../Styles';
 import {useNavigation} from '@react-navigation/native';
+import {Storage} from '@aws-amplify/storage';
+import {Auth} from 'aws-amplify';
 
 const docs = [];
 for (let i = 0; i < 10; i++) {
     docs.push({title: 'Example Doctor', work: 'Brief Description'});
-}
-
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 class SendDoc extends Component {
@@ -28,14 +27,26 @@ class SendDoc extends Component {
         this.state = {
             data: docs,
             modalVisible: false,
+            audioPath: this.props.route.params,
         };
     }
 
     handleSend = async index => {
         this.setState({modalVisible: true});
         try {
-            // await response to cloud
-            await timeout(1500);
+            let fileName = this.state.audioPath.split('/');
+            fileName = fileName[fileName.length - 1];
+            const userID = await Auth.currentAuthenticatedUser();
+            // console.log(userID.username, userID.attributes);
+            // Convert file to blob
+            let file = await fetch(`file://${this.state.audioPath}`);
+            file = await file.blob();
+            // Send blob to AWS S3
+            const res = await Storage.put(
+                `recordings/${userID.username}/${fileName}`,
+                file,
+            );
+            console.log(res);
             Alert.alert(
                 'Successfully Sent!',
                 'Your doctor will respond to you soon.',

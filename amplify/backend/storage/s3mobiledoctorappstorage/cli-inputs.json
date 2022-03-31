@@ -1,0 +1,12 @@
+{
+  "resourceName": "s3mobiledoctorappstorage",
+  "bucketName": "mobile-doctor-app-storage",
+  "policyUUID": "e7d63164",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ]
+}

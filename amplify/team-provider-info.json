@@ -1,19 +1,25 @@
 {
   "staging": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-mobiledoctor-staging-64555-authRole",
-      "UnauthRoleArn": "arn:aws:iam::774387447909:role/amplify-mobiledoctor-staging-64555-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::774387447909:role/amplify-mobiledoctor-staging-64555-authRole",
-      "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-mobiledoctor-staging-64555-deployment",
-      "UnauthRoleName": "amplify-mobiledoctor-staging-64555-unauthRole",
-      "StackName": "amplify-mobiledoctor-staging-64555",
-      "StackId": "arn:aws:cloudformation:us-east-1:774387447909:stack/amplify-mobiledoctor-staging-64555/b8314ef0-ae62-11ec-a601-12211965c2b7",
-      "AmplifyAppId": "d9tyoesbh0wn1"
+      "AuthRoleName": "amplify-mobiledoctorapp-staging-25650-authRole",
+      "UnauthRoleArn": "arn:aws:iam::774387447909:role/amplify-mobiledoctorapp-staging-25650-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::774387447909:role/amplify-mobiledoctorapp-staging-25650-authRole",
+      "Region": "ap-south-1",
+      "DeploymentBucketName": "amplify-mobiledoctorapp-staging-25650-deployment",
+      "UnauthRoleName": "amplify-mobiledoctorapp-staging-25650-unauthRole",
+      "StackName": "amplify-mobiledoctorapp-staging-25650",
+      "StackId": "arn:aws:cloudformation:ap-south-1:774387447909:stack/amplify-mobiledoctorapp-staging-25650/0c11f100-afd5-11ec-8592-06ccd4637ba2",
+      "AmplifyAppId": "d2cwex30p3h113"
     },
     "categories": {
       "auth": {
-        "mobiledoctor": {}
+        "mobiledoctorapp": {}
+      },
+      "storage": {
+        "mobiledoctorapp76aa3f5d": {
+          "bucketName": "amplify-mobiledoctorapp-staging-25650-deployment",
+          "region": "ap-south-1"
+        }
       }
     }
   }

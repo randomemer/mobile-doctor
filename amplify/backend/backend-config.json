@@ -1,6 +1,6 @@
 {
   "auth": {
-    "mobiledoctor": {
+    "mobiledoctorapp": {
       "service": "Cognito",
       "providerPlugin": "awscloudformation",
       "dependsOn": [],
@@ -8,7 +8,7 @@
       "frontendAuthConfig": {
         "socialProviders": [],
         "usernameAttributes": [
-          "PHONE_NUMBER"
+          "EMAIL"
         ],
         "signupAttributes": [
           "GIVEN_NAME",
@@ -20,6 +20,8 @@
           "passwordPolicyMinLength": 8,
           "passwordPolicyCharacters": [
             "REQUIRES_LOWERCASE",
+            "REQUIRES_NUMBERS",
+            "REQUIRES_SYMBOLS",
             "REQUIRES_UPPERCASE"
           ]
         },
@@ -28,9 +30,16 @@
           "SMS"
         ],
         "verificationMechanisms": [
-          "PHONE_NUMBER"
+          "EMAIL"
         ]
       }
+    }
+  },
+  "storage": {
+    "s3mobiledoctorappstorage": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": []
     }
   }
 }
