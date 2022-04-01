@@ -18,16 +18,10 @@ import HistoryDetails from './src/screens/history-details';
 import LoginView from './src/screens/login';
 
 // AWS APIs
-import Amplify, {Auth} from 'aws-amplify';
-import {
-    CognitoUser,
-    CognitoUserPool,
-    CognitoUserSession,
-} from 'amazon-cognito-identity-js';
+import * as mutations from './src/graphql/mutations';
+import Amplify, {Auth, API} from 'aws-amplify';
 import awsconfig from './aws-exports.js';
 Amplify.configure(awsconfig);
-
-Text.defaultProps = {color: '#333'};
 
 const HomeStack = createNativeStackNavigator();
 const HistoryStack = createNativeStackNavigator();
@@ -93,6 +87,7 @@ class HistoryStackScreen extends Component {
     }
 }
 
+Text.defaultProps = {color: '#333'};
 class App extends Component {
     constructor(props) {
         super(props);
@@ -155,13 +150,18 @@ class App extends Component {
             console.log(user);
             // Send the user data to database
             const databaseRecord = {
-                username: signUpData.email,
-                phone_number: signUpData.phone,
-                given_name: signUpData.firstName,
-                family_name: signUpData.lastName,
+                mail_id: signUpData.email,
+                phone: signUpData.phone,
+                first_name: signUpData.firstName,
+                last_name: signUpData.lastName,
                 is_doctor: false,
             };
-            console.log(databaseRecord);
+            const r = await API.graphql({
+                query: mutations.createUser,
+                variables: {input: databaseRecord},
+                authMode: 'API_KEY',
+            });
+            console.log(r);
 
             this.setState({signUpInitiated: true});
         } catch (error) {

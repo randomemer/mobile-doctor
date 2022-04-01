@@ -226,9 +226,9 @@ class Home extends Component {
 
         AudioRecord.init(options);
         AudioRecord.start();
-        AudioRecord.on('data', data => {
-            console.log(data);
-        });
+        // AudioRecord.on('data', data => {
+        //     console.log(data);
+        // });
 
         this.timer = setInterval(() => {
             this.setState({recordTime: this.state.recordTime + 1});

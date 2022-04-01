@@ -13,8 +13,12 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../Styles';
 import {useNavigation} from '@react-navigation/native';
+
+// Amplify and AWS API
 import {Storage} from '@aws-amplify/storage';
-import {Auth} from 'aws-amplify';
+import Amplify, {Auth, API} from 'aws-amplify';
+import * as mutations from '../graphql/mutations';
+import * as queries from '../graphql/queries';
 
 const docs = [];
 for (let i = 0; i < 10; i++) {
@@ -47,6 +51,24 @@ class SendDoc extends Component {
                 file,
             );
             console.log(res);
+            // put recording in database
+            const curDate = new Date();
+            const {attributes} = await Auth.currentAuthenticatedUser();
+            const recordingData = {
+                mail_id: attributes.email,
+                timestamp: `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${curDate.getMonth()}.${curDate.getFullYear()}`,
+                bucketpath_recording: `public/${res.key}`,
+                bucketpath_denoised: null,
+                pulse: null,
+                user_doctor: 'mydoc@gmail.com',
+            };
+            const response = API.graphql({
+                query: mutations.createRecording,
+                variables: {input: recordingData},
+                authMode: 'API_KEY',
+            });
+            console.log(response);
+            // Show modal dialog
             Alert.alert(
                 'Successfully Sent!',
                 'Your doctor will respond to you soon.',
