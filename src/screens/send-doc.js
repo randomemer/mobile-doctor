@@ -43,7 +43,7 @@ class SendDoc extends Component {
             file = await file.blob();
             // Send blob to AWS S3
             const res = await Storage.put(
-                `recordings/${userID.username}/${fileName}`,
+                `recordings/${userID.attributes.email}/${fileName}`,
                 file,
             );
             console.log(res);

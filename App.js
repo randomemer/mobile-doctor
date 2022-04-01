@@ -1,8 +1,8 @@
 // Components
 import React, {Component} from 'react';
-import {Image, Text, View} from 'react-native';
+import {Image, Text, View, Alert} from 'react-native';
 import SimpleToast from 'react-native-simple-toast';
-import styles from './Styles';
+import styles from './src/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 // Navigation
@@ -11,14 +11,19 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 // Importing the screens
-import Home from './screens/home';
-import History from './screens/history';
-import SendDoc from './screens/send-doc';
-import HistoryDetails from './screens/history-details';
-import LoginView from './screens/login';
+import Home from './src/screens/home';
+import History from './src/screens/history';
+import SendDoc from './src/screens/send-doc';
+import HistoryDetails from './src/screens/history-details';
+import LoginView from './src/screens/login';
 
 // AWS APIs
 import Amplify, {Auth} from 'aws-amplify';
+import {
+    CognitoUser,
+    CognitoUserPool,
+    CognitoUserSession,
+} from 'amazon-cognito-identity-js';
 import awsconfig from './aws-exports.js';
 Amplify.configure(awsconfig);
 
@@ -98,13 +103,18 @@ class App extends Component {
         };
     }
 
-    verifyOTP = async otpData => {
+    verifyOTP = async (otpData, jumpTo, reset) => {
         try {
             this.setState({loading: true});
             const message = await Auth.confirmSignUp(otpData.user, otpData.otp);
             console.log(message);
-            this.setState({isLogged: true});
-            SimpleToast.show('Account Created Successfully');
+            // SimpleToast.show('Account Created Successfully');
+            reset();
+            jumpTo('login');
+            Alert.alert(
+                'Account created successfully!',
+                'Login with your new account to continue',
+            );
         } catch (error) {
             // alert(error.message);
             alert(error);
@@ -131,6 +141,7 @@ class App extends Component {
     signUp = async signUpData => {
         try {
             this.setState({loading: true});
+            // Initiate Sign up for the user
             const {user} = await Auth.signUp({
                 username: signUpData.email,
                 password: signUpData.passwd,
@@ -142,11 +153,28 @@ class App extends Component {
                 },
             });
             console.log(user);
+            // Send the user data to database
+            const databaseRecord = {
+                username: signUpData.email,
+                phone_number: signUpData.phone,
+                given_name: signUpData.firstName,
+                family_name: signUpData.lastName,
+                is_doctor: false,
+            };
+            console.log(databaseRecord);
+
             this.setState({signUpInitiated: true});
         } catch (error) {
             alert(error.message);
         }
         this.setState({loading: false});
+    };
+
+    sendUser = async user => {
+        try {
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     render() {
@@ -198,7 +226,9 @@ class App extends Component {
             <LoginView
                 login={data => this.login(data)}
                 signUp={data => this.signUp(data)}
-                otpCallback={data => this.verifyOTP(data)}
+                otpCallback={(data, jumpTo, reset) =>
+                    this.verifyOTP(data, jumpTo, reset)
+                }
                 signUpInitiated={this.state.signUpInitiated}
                 isLoading={this.state.loading}
             />
@@ -221,7 +251,7 @@ class AppWrapper extends Component {
         try {
             const {attributes} = await Auth.currentAuthenticatedUser();
             const session = await Auth.currentSession();
-            console.log(session);
+            // console.log(session);
             this.setState({prelogged: true});
         } catch (error) {
             console.log(error, typeof error);

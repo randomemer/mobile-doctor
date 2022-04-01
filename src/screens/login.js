@@ -16,6 +16,13 @@ class LoginPane extends Component {
     constructor(props) {
         super(props);
         this.state = {userText: '', pwdText: ''};
+
+        this.initialState = this.state;
+    }
+
+    resetState() {
+        console.log('Reset login tab');
+        this.setState(this.initialState);
     }
 
     render() {
@@ -67,6 +74,12 @@ class SignUpPane extends Component {
             passwd: '',
             otp: '',
         };
+        this.initialState = this.state;
+    }
+
+    resetState() {
+        console.log('Reset sign up tab');
+        this.setState(this.initialState);
     }
 
     render() {
@@ -132,10 +145,14 @@ class SignUpPane extends Component {
         const btnCallback = !this.props.signUpInitiated
             ? () => this.props.signUpCallback(data)
             : () =>
-                  this.props.otpCallback({
-                      user: data.email,
-                      otp: this.state.otp,
-                  });
+                  this.props.otpCallback(
+                      {
+                          user: data.email,
+                          otp: this.state.otp,
+                      },
+                      this.props.jumpTo,
+                      () => this.resetState(),
+                  );
         const btnName = !this.props.signUpInitiated ? 'SIGN UP' : 'VERIFY';
         return (
             <View style={styles.loginArea}>
@@ -160,8 +177,9 @@ class LoginView extends Component {
                 {key: 'login', title: 'Login'},
                 {key: 'sign-up', title: 'Sign Up'},
             ],
+            isDoctor: false,
         };
-        this.heartIcon = require('../assets/heart-icon.png');
+        this.heartIcon = require('../../assets/heart-icon.png');
     }
 
     handleLogin = loginFields => {
@@ -220,15 +238,21 @@ class LoginView extends Component {
     };
 
     render() {
-        const renderSceneFunc = ({route}) => {
+        const renderSceneFunc = ({route, jumpTo}) => {
             if (route.key === 'login') {
-                return <LoginPane loginCallback={this.handleLogin} />;
+                return (
+                    <LoginPane
+                        loginCallback={this.handleLogin}
+                        jumpTo={jumpTo}
+                    />
+                );
             } else if (route.key === 'sign-up') {
                 return (
                     <SignUpPane
                         signUpCallback={this.handleSignUp}
                         otpCallback={this.props.otpCallback}
                         signUpInitiated={this.props.signUpInitiated}
+                        jumpTo={jumpTo}
                     />
                 );
             }

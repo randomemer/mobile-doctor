@@ -1,11 +1,6 @@
 import React, {Component} from 'react';
-import AudioRecorderPlayer, {
-    AudioSet,
-    AVEncoderAudioQualityIOSType,
-    AVEncodingOption,
-    AudioEncoderAndroidType,
-    AudioSourceAndroidType,
-} from 'react-native-audio-recorder-player';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import AudioRecord from 'react-native-audio-record';
 import {
     Text,
     View,
@@ -68,14 +63,18 @@ class Home extends Component {
         super(props);
 
         this.state = {
+            recordTimeString: '00:00',
             isRecording: false,
-            finishedRecording: false,
-            recordTimeString: '00:00:00',
-            isPlaying: false,
-            playerActive: false,
-            playTime: 0,
-            audioLength: 0,
+            recordTime: 0,
+            // audioPath: '/storage/emulated/0/Music/recording.mp3',
             audioPath: '',
+            finishedRecording: false,
+            audioLength: 0,
+            isPlaying: false,
+            playTime: 0,
+            playerActive: false,
+            sliding: false,
+            sliderValue: 0,
         };
         this.initialState = this.state;
         this.audioRecorderPlayer = new AudioRecorderPlayer();
@@ -84,28 +83,45 @@ class Home extends Component {
         askPerms();
     }
 
-    Player(props) {
-        const playing = props.state.isPlaying;
-        const callback = playing ? props.pauseCallback : props.playCallback;
-        const position = props.state.playTime / props.state.audioLength;
+    updateTimer() {
+        const minutes = (this.state.recordTime / 60).toFixed(0);
+        const seconds = this.state.recordTime % 60;
+        const timerString = `${minutes.toString().padStart(2, '0')}:${seconds
+            .toString()
+            .padStart(2, '0')}`;
+        this.setState({recordTimeString: timerString});
+    }
+
+    Player = props => {
+        const playing = this.state.isPlaying;
+        const callback = this.state.playerActive
+            ? this.onPause
+            : this.onStartPlay;
 
         const pickupSliderCallback = value => {
-            props.pauseCallback();
+            this.setState({sliding: true});
         };
 
         const releasedSliderCallback = value => {
             try {
                 if (value === 0) {
-                    props.parent.onStopPlayer();
-                    props.playCallback();
+                    this.onStopPlayer();
+                    this.onStartPlay();
                     return;
                 }
-                const newPosition = Math.floor(value * props.state.audioLength);
-                props.parent.audioRecorderPlayer.seekToPlayer(newPosition);
-                props.playCallback();
+
+                this.setState({sliding: false, sliderValue: value});
+                if (!this.state.playerActive) {
+                    this.onStartPlay();
+                    if (!this.state.isPlaying) {
+                        this.audioRecorderPlayer.pausePlayer();
+                    }
+                }
+                this.audioRecorderPlayer.seekToPlayer(value);
             } catch (error) {
                 console.log(error);
             }
+            console.log('Slider released');
         };
 
         return (
@@ -123,21 +139,20 @@ class Home extends Component {
                 </TouchableHighlight>
                 <Slider
                     minimumValue={0}
-                    maximumValue={1}
-                    minimumTrackTintColor={'#ff5456'}
+                    maximumValue={this.state.audioLength}
                     onSlidingStart={pickupSliderCallback}
                     onSlidingComplete={releasedSliderCallback}
-                    value={isNaN(position) ? 0 : position}
+                    value={this.state.playTime}
                     style={styles.slider}></Slider>
                 <TouchableHighlight
-                    onPress={props.deleteCallback}
+                    onPress={() => this.deleteRecording()}
                     underlayColor={'#b32022'}
                     style={styles.deleteRecordingButton}>
                     <Icon name="trash" size={24} color={'white'} />
                 </TouchableHighlight>
             </View>
         );
-    }
+    };
 
     render() {
         const recordBtnCallback = this.state.isRecording
@@ -184,14 +199,7 @@ class Home extends Component {
                         styles.recordActionsBar,
                         this.state.finishedRecording ? {} : {opacity: 0.7},
                     ]}>
-                    <this.Player
-                        playCallback={() => this.onStartPlay()}
-                        pauseCallback={() => this.onPause()}
-                        deleteCallback={() => this.deleteRecording()}
-                        enabled={this.state.finishedRecording}
-                        state={this.state}
-                        parent={this}
-                    />
+                    <this.Player enabled={this.state.finishedRecording} />
                     <SendButton audiofile={this.state.audioPath} />
                 </View>
             </View>
@@ -207,47 +215,38 @@ class Home extends Component {
         const hash = `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${curDate.getMonth()}.${curDate.getFullYear()}`;
         const path = `${musicFolder}/r-${hash}.wav`;
         console.log(path);
-        const audioSet = {
-            // Android
-            AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
-            AudioSourceAndroid: AudioSourceAndroidType.MIC,
-            AudioSamplingRateAndroid: 8000,
-            AudioEncodingBitRateAndroid: 16,
-            // IOS
-            AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
-            AVNumberOfChannelsKeyIOS: 1,
-            AVFormatIDKeyIOS: AVEncodingOption.aac,
-            AVSampleRateKeyIOS: 8000,
+
+        const options = {
+            sampleRate: 4000, // default 44100
+            channels: 1, // 1 or 2, default 1
+            bitsPerSample: 16, // 8 or 16, default 16
+            audioSource: 1, // android only
+            wavFile: `r-${hash}.wav`,
         };
-        console.log(audioSet);
-        try {
-            const uri = await this.audioRecorderPlayer.startRecorder(
-                path,
-                audioSet,
-            );
-            console.log(`uri: ${uri}`);
-            // Update timer
-            this.audioRecorderPlayer.addRecordBackListener(event => {
-                this.setState({
-                    recordTimeString: this.audioRecorderPlayer.mmssss(
-                        event.currentPosition,
-                    ),
-                    audioLength: event.currentPosition,
-                });
-            });
-            this.setState({audioPath: path});
-        } catch (error) {
-            console.log(error);
-        }
+
+        AudioRecord.init(options);
+        AudioRecord.start();
+        AudioRecord.on('data', data => {
+            console.log(data);
+        });
+
+        this.timer = setInterval(() => {
+            this.setState({recordTime: this.state.recordTime + 1});
+            this.updateTimer();
+        }, 1000);
     };
 
     onStopRecord = async () => {
         console.log('Stopped Recording');
         try {
-            const result = await this.audioRecorderPlayer.stopRecorder();
-            this.audioRecorderPlayer.removeRecordBackListener;
-            this.setState({isRecording: false, finishedRecording: true});
-            console.log(result);
+            const path = await AudioRecord.stop();
+            console.log(path);
+            this.setState({
+                isRecording: false,
+                finishedRecording: true,
+                audioPath: path,
+            });
+            clearInterval(this.timer);
         } catch (error) {
             console.log(error);
         }
@@ -261,16 +260,23 @@ class Home extends Component {
             );
             console.log(res);
             this.audioRecorderPlayer.addPlayBackListener(event => {
-                const progress = event.currentPosition / event.duration;
-                if (progress === 1) {
+                if (event.currentPosition === event.duration) {
                     this.onStopPlayer();
-                } else if (progress === 0) {
-                    console.log('Begin');
+                    console.log('Player Stopped');
                 }
                 this.setState({
                     playTime: event.currentPosition,
                     audioLength: event.duration,
+                    // sliderValue: this.state.isPlaying
+                    //     ? event.currentPosition
+                    //     : this.state.sliderValue,
                 });
+                // if (this.state.sliderValue !== this.state.playTime) {
+                //     console.log('Conflict', this.state.sliderValue);
+                //     this.audioRecorderPlayer.seekToPlayer(
+                //         this.state.sliderValue,
+                //     );
+                // }
             });
         } catch (error) {
             console.log(error);
@@ -279,8 +285,13 @@ class Home extends Component {
 
     onPause = async () => {
         try {
+            let res;
+            if (this.state.isPlaying) {
+                res = await this.audioRecorderPlayer.pausePlayer();
+            } else {
+                res = await this.audioRecorderPlayer.resumePlayer();
+            }
             this.setState({isPlaying: !this.state.isPlaying});
-            const res = await this.audioRecorderPlayer.pausePlayer();
             console.log(res);
         } catch (error) {
             console.log(error);
@@ -293,7 +304,7 @@ class Home extends Component {
             this.audioRecorderPlayer.removePlayBackListener();
             this.setState({
                 playerActive: false,
-                isPlaying: false,
+                isPlaying: this.state.sliding && this.state.isPlaying,
                 playTime: 0,
                 audioLength: 0,
             });

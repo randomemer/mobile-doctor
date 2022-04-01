@@ -4,10 +4,9 @@ const styles = StyleSheet.create({
     // Loading Screen
     loadingScreen: {
         flex: 1,
-        backgroundColor: '#525252',
+        backgroundColor: '#E6E6EA',
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 5,
     },
     // Main App Container
     appContainer: {
