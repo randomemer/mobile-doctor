@@ -87,6 +87,22 @@ const styles = StyleSheet.create({
     },
     loginIcons: {},
     // RECORD SECTION
+    smoothShadow: {
+        borderRadius: 12,
+        backgroundColor: 'white',
+        padding: 12,
+        color: 'black',
+        // iOS shadow
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+        // android shadow
+        elevation: 2,
+    },
     container: {
         backgroundColor: '#eeeeee',
         width: '100%',
@@ -352,7 +368,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    genderSelect: {},
+    genderDrop: {
+        width: '100%',
+        height: 50,
+        backgroundColor: 'white',
+    },
+    phonePicker: {
+        height: '10%',
+        width: '90%',
+    },
+    phonePickerText: {
+        color: '#333',
+        fontSize: 16,
+    },
 });
 
 export default styles;

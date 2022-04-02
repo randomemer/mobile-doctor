@@ -5,6 +5,7 @@ import styles from '../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import LoadingModal from '../components/loading-modal';
 
 // AWS APIs
 import * as queries from '../graphql/queries';
@@ -16,19 +17,15 @@ class Profile extends Component {
 
         this.state = {
             profileLoading: false,
-            userData: {
-                first_name: 'Shashank',
-                gender: null,
-                is_doctor: false,
-                last_name: 'Pathipati',
-                mail_id: 'pshashank569@gmail.com',
-                phone: '+919500062931',
-            },
+            userData: {},
+            loading: true,
         };
-        // this.loadProfileData();
+
+        this.loadProfileData();
     }
 
     loadProfileData = async () => {
+        this.setState({loading: true});
         try {
             const {attributes} = await Auth.currentAuthenticatedUser();
             const username = attributes.email;
@@ -41,7 +38,9 @@ class Profile extends Component {
             this.setState({userData: data.getUser});
         } catch (error) {
             console.log(error);
+            this.setState({loading: false});
         }
+        this.setState({loading: false});
     };
 
     profileField = props => {
@@ -72,6 +71,7 @@ class Profile extends Component {
     render() {
         return (
             <SafeAreaView style={styles.profileContainer}>
+                <LoadingModal modalVisible={this.state.loading} />
                 <View style={styles.profileCard}>
                     <Image style={styles.profileImage}></Image>
                     <Text
@@ -110,6 +110,16 @@ class Profile extends Component {
                 </View>
             </SafeAreaView>
         );
+    }
+
+    componentDidUpdate(prevProps) {
+        console.log('Previous Props', prevProps);
+        console.log(this.props);
+        if (this.props.route?.params?.doUpdateProfile) {
+            console.log('Updated', this.props.route);
+            this.props.route.params.doUpdateProfile = false;
+            this.loadProfileData();
+        }
     }
 }
 
