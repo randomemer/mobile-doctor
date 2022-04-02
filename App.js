@@ -1,6 +1,6 @@
 // Components
 import React, {Component} from 'react';
-import {Image, Text, View, Alert} from 'react-native';
+import {Image, Text, View, Alert, TouchableHighlight} from 'react-native';
 import SimpleToast from 'react-native-simple-toast';
 import styles from './src/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -16,16 +16,20 @@ import History from './src/screens/history';
 import SendDoc from './src/screens/send-doc';
 import HistoryDetails from './src/screens/history-details';
 import LoginView from './src/screens/login';
+import Profile from './src/screens/profile';
+import EditProfile from './src/screens/edit-profile';
 
 // AWS APIs
 import * as mutations from './src/graphql/mutations';
 import Amplify, {Auth, API} from 'aws-amplify';
 import awsconfig from './aws-exports.js';
+import {sin} from 'react-native/Libraries/Animated/Easing';
 Amplify.configure(awsconfig);
 
+const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
 const HistoryStack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+const ProfileStack = createNativeStackNavigator();
 
 class HomeStackScreen extends Component {
     constructor(props) {
@@ -83,6 +87,63 @@ class HistoryStackScreen extends Component {
                         headerTitleStyle: {color: '#fff'},
                     }}></HistoryStack.Screen>
             </HistoryStack.Navigator>
+        );
+    }
+}
+
+class ProfileStackScreen extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    ProfileHeader = props => {
+        const signOutFunc = () => {
+            Alert.alert(
+                'Log Out?',
+                'You will be logged out and will have to sign in again.',
+                [
+                    {text: 'Cancel', style: 'cancel'},
+                    {text: 'LOG OUT', onPress: this.props.signOutCallback},
+                ],
+            );
+        };
+
+        return (
+            <View style={styles.profileHeaderStyle}>
+                <Text style={styles.profileHeaderText}>Profile</Text>
+                <TouchableHighlight
+                    onPress={signOutFunc}
+                    underlayColor="rgba(256,256,256, 0.3)"
+                    style={styles.logoutButton}>
+                    <Icon name="log-out-outline" color="#fff" size={30} />
+                </TouchableHighlight>
+            </View>
+        );
+    };
+
+    render() {
+        return (
+            <ProfileStack.Navigator>
+                <ProfileStack.Screen
+                    name="profile"
+                    component={Profile}
+                    options={{
+                        headerStyle: {
+                            backgroundColor: '#ff5456',
+                        },
+                        header: props => <this.ProfileHeader {...props} />,
+                    }}></ProfileStack.Screen>
+                <ProfileStack.Screen
+                    name="edit-profile"
+                    component={EditProfile}
+                    options={{
+                        headerStyle: {
+                            backgroundColor: '#ff5456',
+                        },
+                        title: 'Edit Profile',
+                    }}
+                />
+            </ProfileStack.Navigator>
         );
     }
 }
@@ -170,8 +231,15 @@ class App extends Component {
         this.setState({loading: false});
     };
 
-    sendUser = async user => {
+    signOut = async () => {
         try {
+            const response = await Auth.signOut();
+            console.log(response);
+            this.setState({
+                isLogged: false,
+                signUpInitiated: false,
+                loading: false,
+            });
         } catch (error) {
             console.log(error);
         }
@@ -186,10 +254,24 @@ class App extends Component {
                         tabBarIcon: ({focused, color, size}) => {
                             let iconName;
 
-                            if (route.name === 'Home') {
-                                iconName = focused ? 'home' : 'home-outline';
-                            } else if (route.name === 'History') {
-                                iconName = focused ? 'time' : 'time-outline';
+                            switch (route.name) {
+                                case 'Home':
+                                    iconName = focused
+                                        ? 'home'
+                                        : 'home-outline';
+                                    break;
+                                case 'History':
+                                    iconName = focused
+                                        ? 'time'
+                                        : 'time-outline';
+                                    break;
+                                case 'Profile':
+                                    iconName = focused
+                                        ? 'person-circle'
+                                        : 'person-circle-outline';
+                                    break;
+                                default:
+                                    break;
                             }
 
                             return (
@@ -204,22 +286,18 @@ class App extends Component {
                         tabBarInactiveTintColor: 'gray',
                         tabBarShowLabel: false,
                         tabBarStyle: {},
-                        headerShown:
-                            route.name in {Home: undefined} ? false : false,
+                        headerShown: false,
                     })}>
-                    <Tab.Screen
-                        name="Home"
-                        component={HomeStackScreen}></Tab.Screen>
-                    <Tab.Screen
-                        name="History"
-                        component={HistoryStackScreen}
-                        options={{
-                            title: 'Previous Interactions',
-                            headerStyle: {
-                                backgroundColor: '#ff5456',
-                            },
-                            headerTitleStyle: {color: '#fff'},
-                        }}></Tab.Screen>
+                    <Tab.Screen name="Home" component={HomeStackScreen} />
+                    <Tab.Screen name="History" component={HistoryStackScreen} />
+                    <Tab.Screen name="Profile">
+                        {props => (
+                            <ProfileStackScreen
+                                {...props}
+                                signOutCallback={this.signOut}
+                            />
+                        )}
+                    </Tab.Screen>
                 </Tab.Navigator>
             </NavigationContainer>
         ) : (

@@ -255,6 +255,104 @@ const styles = StyleSheet.create({
         color: '#333',
         fontSize: 18,
     },
+    // *************************
+    // ******* PROFILE *********
+    // *************************
+    profileContainer: {
+        flex: 1,
+        alignItems: 'center',
+        paddingHorizontal: '5%',
+    },
+    profileHeaderStyle: {
+        backgroundColor: '#ff5456',
+        paddingHorizontal: '5%',
+        height: 57.5,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        alignSelf: 'stretch',
+    },
+    profileHeaderText: {
+        color: '#fff',
+        fontSize: 20,
+        textTransform: 'uppercase',
+        fontWeight: 'bold',
+        letterSpacing: 1,
+    },
+    profileCard: {
+        height: '30%',
+        width: '90%',
+        borderRadius: 10,
+        marginTop: '5%',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        backgroundColor: '#525252',
+    },
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 100 / 2,
+        backgroundColor: 'lime',
+    },
+    profileText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    profileInfo: {
+        marginTop: '15%',
+        display: 'flex',
+        flexDirection: 'column',
+        width: '82.5%',
+    },
+    profileField: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: '5%',
+    },
+    profileFieldIcon: {
+        marginRight: 20,
+    },
+    profileFieldText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    logoutButton: {
+        borderRadius: 30,
+        height: 40,
+        width: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    editButton: {
+        alignContent: 'flex-end',
+        position: 'absolute',
+        right: 0,
+    },
+    // *************************
+    // ***** EDIT PROFILE ******
+    // *************************
+    editProfContainer: {
+        flex: 1,
+        alignItems: 'center',
+        paddingHorizontal: '7.5%',
+        paddingTop: '7.5%',
+    },
+    confirmEditButton: {
+        position: 'absolute',
+        bottom: '3%',
+        right: '5%',
+        height: 60,
+        width: 60,
+        borderRadius: 60 / 2,
+        backgroundColor: '#009FB7',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    genderSelect: {},
 });
 
 export default styles;

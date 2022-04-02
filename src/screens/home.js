@@ -217,7 +217,7 @@ class Home extends Component {
         console.log(path);
 
         const options = {
-            sampleRate: 4000, // default 44100
+            sampleRate: 44100, // default 44100
             channels: 1, // 1 or 2, default 1
             bitsPerSample: 16, // 8 or 16, default 16
             audioSource: 1, // android only
