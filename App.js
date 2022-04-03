@@ -4,6 +4,7 @@ import {Image, Text, View, Alert, TouchableHighlight} from 'react-native';
 import SimpleToast from 'react-native-simple-toast';
 import styles from './src/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {MainContext} from './src/components/main-context';
 
 // Navigation
 import {NavigationContainer} from '@react-navigation/native';
@@ -21,9 +22,9 @@ import EditProfile from './src/screens/edit-profile';
 
 // AWS APIs
 import * as mutations from './src/graphql/mutations';
+import * as queries from './src/graphql/queries';
 import Amplify, {Auth, API} from 'aws-amplify';
 import awsconfig from './aws-exports.js';
-import {sin} from 'react-native/Libraries/Animated/Easing';
 Amplify.configure(awsconfig);
 
 const Tab = createBottomTabNavigator();
@@ -148,12 +149,12 @@ class ProfileStackScreen extends Component {
     }
 }
 
-Text.defaultProps = {color: '#333'};
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
             isLogged: this.props.prelogged,
+            isDoctor: false,
             signUpInitiated: false,
             loading: false,
         };
@@ -163,8 +164,8 @@ class App extends Component {
         try {
             this.setState({loading: true});
             const message = await Auth.confirmSignUp(otpData.user, otpData.otp);
-            console.log(message);
-            // SimpleToast.show('Account Created Successfully');
+            // console.log(message);
+            SimpleToast.show('Account Created Successfully');
             reset();
             jumpTo('login');
             Alert.alert(
@@ -172,21 +173,30 @@ class App extends Component {
                 'Login with your new account to continue',
             );
         } catch (error) {
-            // alert(error.message);
             alert(error);
         }
         this.setState({loading: false});
     };
 
     login = async loginFields => {
+        this.setState({loading: true});
         try {
-            this.setState({loading: true});
+            // Authenticate the user
             const res = await Auth.signIn(
                 loginFields.userText,
                 loginFields.pwdText,
             );
-            console.log('res: ', res);
-            this.setState({isLogged: true});
+            // console.log('res: ', res);
+            // Query if the user is a doctor
+            const {data} = await API.graphql({
+                query: queries.getUser,
+                variables: {mail_id: loginFields.userText},
+                authMode: 'API_KEY',
+            });
+            this.setState({
+                isLogged: true,
+                isDoctor: data.getUser.is_doctor,
+            });
             SimpleToast.show('Logged In Successfully');
         } catch (error) {
             alert(error.message);
@@ -208,21 +218,39 @@ class App extends Component {
                     family_name: signUpData.lastName,
                 },
             });
-            console.log(user);
+            // console.log(user);
             // Send the user data to database
             const databaseRecord = {
                 mail_id: signUpData.email,
                 phone: signUpData.phone,
                 first_name: signUpData.firstName,
                 last_name: signUpData.lastName,
-                is_doctor: false,
+                is_doctor: signUpData.is_doctor,
             };
             const r = await API.graphql({
                 query: mutations.createUser,
                 variables: {input: databaseRecord},
                 authMode: 'API_KEY',
             });
-            console.log(r);
+            // console.log(r);
+
+            if (signUpData.is_doctor) {
+                const doctorData = {
+                    mail_id: signUpData.email,
+                    years: signUpData.years,
+                    expertise: signUpData.expertise,
+                    clinic_name: signUpData.clinic_name,
+                    clinic_address: null,
+                    clinic_phone: signUpData.clinic_phone,
+                    location: null,
+                };
+                const docR = await API.graphql({
+                    query: mutations.createDoctor,
+                    variables: {input: doctorData},
+                    authMode: 'API_KEY',
+                });
+                console.log(docR);
+            }
 
             this.setState({signUpInitiated: true});
         } catch (error) {
@@ -320,7 +348,7 @@ class AppWrapper extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {loaded: false, prelogged: false};
+        this.state = {loaded: false, prelogged: false, profile: null};
         this.heartIcon = require('./assets/heart-icon.png');
         this.getLastUser();
     }
@@ -328,9 +356,12 @@ class AppWrapper extends Component {
     getLastUser = async () => {
         try {
             const {attributes} = await Auth.currentAuthenticatedUser();
-            const session = await Auth.currentSession();
-            // console.log(session);
-            this.setState({prelogged: true});
+            const {data} = await API.graphql({
+                query: queries.getUser,
+                variables: {mail_id: attributes.email},
+                authMode: 'API_KEY',
+            });
+            this.setState({prelogged: true, profile: data.getUser});
         } catch (error) {
             console.log(error, typeof error);
         }
@@ -339,7 +370,9 @@ class AppWrapper extends Component {
 
     render() {
         const curState = this.state.loaded ? (
-            <App prelogged={this.state.prelogged} />
+            <MainContext.Provider value={{profile: this.state.profile}}>
+                <App prelogged={this.state.prelogged} />
+            </MainContext.Provider>
         ) : (
             <View style={styles.loadingScreen}>
                 <Image style={styles.heartIcon} source={this.heartIcon} />

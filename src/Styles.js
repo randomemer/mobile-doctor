@@ -55,7 +55,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         paddingLeft: 10,
         alignSelf: 'stretch',
-        elevation: 2,
         backgroundColor: 'white',
         marginBottom: 20,
         color: '#333',
@@ -85,6 +84,7 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         alignSelf: 'flex-end',
     },
+    doctorFields: {marginTop: 20},
     loginIcons: {},
     // RECORD SECTION
     smoothShadow: {

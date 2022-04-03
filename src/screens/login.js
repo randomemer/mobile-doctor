@@ -4,6 +4,7 @@ import {
     Text,
     TextInput,
     View,
+    ScrollView,
     Modal,
     ActivityIndicator,
     TouchableOpacity,
@@ -72,7 +73,13 @@ class SignUpPane extends Component {
             email: '',
             phone: '',
             passwd: '',
+            isDoctor: false,
             otp: '',
+            // Doc Info
+            clinic_name: '',
+            clinic_phone: '',
+            years: 0,
+            expertise: '',
         };
         this.initialState = this.state;
     }
@@ -82,20 +89,55 @@ class SignUpPane extends Component {
         this.setState(this.initialState);
     }
 
+    doctorFields = () => {
+        return (
+            <View style={styles.doctorFields}>
+                <TextInput
+                    placeholder="Clinic/Hospital Name"
+                    placeholderTextColor={'#aaa'}
+                    style={[styles.loginInput, styles.smoothShadow]}
+                    onChangeText={text => this.setState({clinic_name: text})}
+                    returnKeyType={'next'}
+                />
+                <TextInput
+                    placeholder="Clinic/Hospital Phone"
+                    placeholderTextColor={'#aaa'}
+                    style={[styles.loginInput, styles.smoothShadow]}
+                    onChangeText={text => this.setState({clinic_phone: text})}
+                    returnKeyType={'next'}
+                />
+                <TextInput
+                    placeholder="Years of experience"
+                    placeholderTextColor={'#aaa'}
+                    style={[styles.loginInput, styles.smoothShadow]}
+                    onChangeText={text => this.setState({years: text})}
+                    returnKeyType={'next'}
+                />
+                <TextInput
+                    placeholder="Field of expertise"
+                    placeholderTextColor={'#aaa'}
+                    style={[styles.loginInput, styles.smoothShadow]}
+                    onChangeText={text => this.setState({expertise: text})}
+                    returnKeyType={'next'}
+                />
+            </View>
+        );
+    };
+
     render() {
         const fields = !this.props.signUpInitiated ? (
-            <View style={styles.inputFields}>
+            <ScrollView style={styles.inputFields}>
                 <TextInput
                     placeholder="First Name"
                     placeholderTextColor={'#aaa'}
-                    style={styles.loginInput}
+                    style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({firstName: text})}
                     returnKeyType={'next'}
                 />
                 <TextInput
                     placeholder="Last Name"
                     placeholderTextColor={'#aaa'}
-                    style={styles.loginInput}
+                    style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({lastName: text})}
                     returnKeyType={'next'}
                 />
@@ -103,7 +145,7 @@ class SignUpPane extends Component {
                 <TextInput
                     placeholder="E-Mail"
                     placeholderTextColor={'#aaa'}
-                    style={styles.loginInput}
+                    style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({email: text})}
                     returnKeyType={'next'}
                 />
@@ -111,7 +153,7 @@ class SignUpPane extends Component {
                 <TextInput
                     placeholder="Phone Number"
                     placeholderTextColor={'#aaa'}
-                    style={styles.loginInput}
+                    style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({phone: text})}
                     returnKeyType={'next'}
                 />
@@ -124,24 +166,46 @@ class SignUpPane extends Component {
                     onSubmitEditing={() =>
                         this.props.signUpCallback(this.state)
                     }
-                    style={styles.loginInput}
+                    style={[styles.loginInput, styles.smoothShadow]}
                 />
-            </View>
+                <Text
+                    style={styles.forgotPwd}
+                    onPress={() =>
+                        this.setState({isDoctor: !this.state.isDoctor})
+                    }>
+                    {this.state.isDoctor
+                        ? 'Not a doctor?'
+                        : 'Are you a doctor?'}
+                </Text>
+                {this.state.isDoctor ? this.doctorFields() : undefined}
+            </ScrollView>
         ) : (
             <TextInput
                 placeholder="Enter OTP"
                 placeholderTextColor={'#aaa'}
                 onChangeText={text => this.setState({otp: text})}
-                style={styles.loginInput}
+                style={[styles.loginInput, styles.smoothShadow]}
             />
         );
-        const data = {
+        let data = {
             firstName: this.state.firstName,
             lastName: this.state.lastName,
             email: this.state.email,
             phone: this.state.phone,
             passwd: this.state.passwd,
+            is_doctor: this.state.isDoctor,
         };
+
+        if (data.is_doctor) {
+            data = {
+                ...data,
+                clinic_name: this.state.clinic_name,
+                clinic_phone: this.state.clinic_phone,
+                years: this.state.years,
+                expertise: this.state.expertise,
+            };
+        }
+
         const btnCallback = !this.props.signUpInitiated
             ? () => this.props.signUpCallback(data)
             : () =>
@@ -230,7 +294,10 @@ class LoginView extends Component {
 
         // Check if phone regex is correct
         const phoneReg = /^\+[1-9]\d{1,14}$/;
-        if (!phoneReg.test(signUpData.phone)) {
+        if (
+            !phoneReg.test(signUpData.phone) ||
+            (signUpData?.is_doctor && !phoneReg.test(signUpData.clinic_phone))
+        ) {
             alert('Invalid Phone Number');
             return;
         }

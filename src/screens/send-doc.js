@@ -13,6 +13,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../Styles';
 import {useNavigation} from '@react-navigation/native';
+import {MainContext} from '../components/main-context';
 
 // Amplify and AWS API
 import {Storage} from '@aws-amplify/storage';
@@ -26,6 +27,8 @@ for (let i = 0; i < 10; i++) {
 }
 
 class SendDoc extends Component {
+    static contextType = MainContext;
+
     constructor(props) {
         super(props);
         this.state = {

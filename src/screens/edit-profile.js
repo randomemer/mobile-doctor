@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import ReactNativePhoneInput from 'react-native-phone-input';
 import DropdownComponent from '../components/dropdown';
+import {MainContext} from '../components/main-context';
 
 // AWS APIs
 import * as mutations from '../graphql/mutations';
@@ -20,6 +21,7 @@ import Amplify, {Auth, API} from 'aws-amplify';
 import LoadingModal from '../components/loading-modal';
 
 class EditProfile extends Component {
+    static contextType = MainContext;
     constructor(props) {
         super(props);
         this.field = this.props.route.params;
@@ -57,8 +59,7 @@ class EditProfile extends Component {
         this.setState({loading: true});
 
         try {
-            const {attributes} = await Auth.currentAuthenticatedUser();
-            data['mail_id'] = attributes.email;
+            data['mail_id'] = this.context.profile.mail_id;
             const updateResponse = await API.graphql({
                 authMode: 'API_KEY',
                 query: mutations.updateUser,
@@ -79,8 +80,7 @@ class EditProfile extends Component {
         const data = {phone: this.phoneSelect.getValue()};
         this.setState({loading: true});
         try {
-            const user = await Auth.currentAuthenticatedUser();
-            data['mail_id'] = user.attributes.email;
+            data['mail_id'] = this.context.profile.mail_id;
             // Update with Amplify authentication
             const authResponse = await Auth.updateUserAttributes(user, {
                 phone_number: data.phone,
@@ -184,7 +184,7 @@ class EditProfile extends Component {
                                 this.setState({newvalue: text})
                             }
                             onSubmitEditing={() => this.changePassword()}
-                            style={styles.loginInput}
+                            style={[styles.loginInput, styles.smoothShadow]}
                         />
                     </React.Fragment>
                 );

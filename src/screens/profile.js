@@ -6,12 +6,15 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import LoadingModal from '../components/loading-modal';
+import {MainContext} from '../components/main-context';
 
 // AWS APIs
 import * as queries from '../graphql/queries';
-import Amplify, {Auth, API} from 'aws-amplify';
+import Amplify, {API} from 'aws-amplify';
 
 class Profile extends Component {
+    static contextType = MainContext;
+
     constructor(props) {
         super(props);
 
@@ -20,21 +23,17 @@ class Profile extends Component {
             userData: {},
             loading: true,
         };
-
-        this.loadProfileData();
     }
 
     loadProfileData = async () => {
         this.setState({loading: true});
         try {
-            const {attributes} = await Auth.currentAuthenticatedUser();
-            const username = attributes.email;
             const {data} = await API.graphql({
                 query: queries.getUser,
-                variables: {mail_id: username},
+                variables: {mail_id: this.context.profile.mail_id},
                 authMode: 'API_KEY',
             });
-            console.log(data);
+            // console.log(data);
             this.setState({userData: data.getUser});
         } catch (error) {
             console.log(error);
@@ -112,11 +111,12 @@ class Profile extends Component {
         );
     }
 
-    componentDidUpdate(prevProps) {
-        console.log('Previous Props', prevProps);
-        console.log(this.props);
+    componentDidMount() {
+        this.loadProfileData();
+    }
+
+    componentDidUpdate() {
         if (this.props.route?.params?.doUpdateProfile) {
-            console.log('Updated', this.props.route);
             this.props.route.params.doUpdateProfile = false;
             this.loadProfileData();
         }
