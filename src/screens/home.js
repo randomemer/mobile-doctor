@@ -68,7 +68,7 @@ class Home extends Component {
             recordTime: 0,
             // audioPath: '/storage/emulated/0/Music/recording.mp3',
             audioPath: '',
-            finishedRecording: false,
+            finishedRecording: true, // change it back to false later
             audioLength: 0,
             isPlaying: false,
             playTime: 0,
@@ -212,12 +212,14 @@ class Home extends Component {
 
         const musicFolder = reactNativeFetchBlob.fs.dirs.MusicDir;
         const curDate = new Date();
-        const hash = `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${curDate.getMonth()}.${curDate.getFullYear()}`;
+        const hash = `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${
+            curDate.getMonth() + 1
+        }.${curDate.getFullYear()}`;
         const path = `${musicFolder}/r-${hash}.wav`;
         console.log(path);
 
         const options = {
-            sampleRate: 4000, // default 44100
+            sampleRate: 44100, // default 44100
             channels: 1, // 1 or 2, default 1
             bitsPerSample: 16, // 8 or 16, default 16
             audioSource: 1, // android only

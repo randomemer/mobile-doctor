@@ -276,8 +276,14 @@ const styles = StyleSheet.create({
     // *************************
     profileContainer: {
         flex: 1,
+    },
+    profileScrollView: {
+        flex: 1,
+        // paddingBottom: 60,
+    },
+    profileScrollViewContainer: {
         alignItems: 'center',
-        paddingHorizontal: '5%',
+        paddingVertical: 50,
     },
     profileHeaderStyle: {
         backgroundColor: '#ff5456',
@@ -300,7 +306,7 @@ const styles = StyleSheet.create({
         height: '30%',
         width: '90%',
         borderRadius: 10,
-        marginTop: '5%',
+        // marginTop: '5%',
         alignItems: 'center',
         justifyContent: 'space-evenly',
         backgroundColor: '#525252',
@@ -317,6 +323,12 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     profileInfo: {
+        marginTop: '15%',
+        display: 'flex',
+        flexDirection: 'column',
+        width: '82.5%',
+    },
+    doctorInfo: {
         marginTop: '15%',
         display: 'flex',
         flexDirection: 'column',
@@ -380,6 +392,42 @@ const styles = StyleSheet.create({
     phonePickerText: {
         color: '#333',
         fontSize: 16,
+    },
+    // *************************
+    // ***** DOCTOR HOME *******
+    // *************************
+    docHomeContainer: {
+        flex: 1,
+        // alignItems: 'center',
+        // paddingHorizontal: 25,
+    },
+    docWelcomeText: {
+        color: '#333',
+        fontSize: 32,
+        fontWeight: 'bold',
+        marginBottom: '7.5%',
+        backgroundColor: 'green',
+    },
+    doctorRequests: {paddingHorizontal: 25},
+    docSectionHeader: {
+        display: 'flex',
+        flexDirection: 'row',
+        // marginBottom: 20,
+        alignItems: 'center',
+    },
+    docSectionText: {
+        color: '#333',
+        fontSize: 24,
+        fontWeight: '700',
+    },
+    docRequestCard: {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '90%',
+        height: 100,
+        borderRadius: 10,
+        alignSelf: 'center',
+        padding: 20,
     },
 });
 

@@ -19,6 +19,16 @@ import {MainContext} from '../components/main-context';
 import * as mutations from '../graphql/mutations';
 import Amplify, {Auth, API} from 'aws-amplify';
 import LoadingModal from '../components/loading-modal';
+import {up} from 'inquirer/lib/utils/readline';
+
+function beautifyName(string) {
+    return string
+        .split('_')
+        .map(ele => {
+            return ele[0].toUpperCase() + ele.slice(1);
+        })
+        .join(' ');
+}
 
 class EditProfile extends Component {
     static contextType = MainContext;
@@ -26,7 +36,7 @@ class EditProfile extends Component {
         super(props);
         this.field = this.props.route.params;
         this.props.navigation.setOptions({
-            title: `Edit ${this.field.fieldName}`,
+            title: `Edit ${beautifyName(this.field.fieldName)}`,
         });
 
         this.state = {
@@ -48,6 +58,28 @@ class EditProfile extends Component {
             },
         ]);
     }
+
+    updateGeneric = async () => {
+        this.setState({loading: true});
+        const data = {};
+        data['mail_id'] = this.context.profile.mail_id;
+        data[this.field.fieldName] = this.state.newvalue;
+        try {
+            const upRes = await API.graphql({
+                query: mutations.updateDoctor,
+                variables: {input: data},
+                authMode: 'API_KEY',
+            });
+            console.log(upRes);
+        } catch (error) {
+            console.log(error);
+            alert(error?.message || error.errors[0].message);
+            this.setState({loading: false});
+            return;
+        }
+        this.setState({loading: false});
+        this.showAlert();
+    };
 
     updateGender = async () => {
         if (this.state.newvalue === null) {
@@ -77,22 +109,30 @@ class EditProfile extends Component {
     };
 
     updatePhone = async () => {
-        const data = {phone: this.phoneSelect.getValue()};
         this.setState({loading: true});
+        const data = {};
+        data['mail_id'] = this.context.profile.mail_id;
+        data[this.field.fieldName] = this.phoneSelect.getValue();
+        console.log(data);
         try {
-            data['mail_id'] = this.context.profile.mail_id;
             // Update with Amplify authentication
-            const authResponse = await Auth.updateUserAttributes(user, {
-                phone_number: data.phone,
-            });
-            console.log(authResponse);
+            if (this.field.fieldName === 'phone') {
+                const user = await Auth.currentAuthenticatedUser();
+                const authResponse = await Auth.updateUserAttributes(user, {
+                    phone_number: data.phone,
+                });
+                // console.log(authResponse);
+            }
             // Update record in database
             const updateResponse = await API.graphql({
                 authMode: 'API_KEY',
-                query: mutations.updateUser,
+                query:
+                    this.field.fieldName === 'phone'
+                        ? mutations.updateUser
+                        : mutations.updateDoctor,
                 variables: {input: data},
             });
-            console.log('Update response : ', updateResponse);
+            // console.log('Update response : ', updateResponse);
         } catch (error) {
             console.log(error);
             alert(error.message);
@@ -143,6 +183,7 @@ class EditProfile extends Component {
                 );
                 break;
             case 'phone':
+            case 'clinic_phone':
                 callback = this.updatePhone;
                 pageContent = (
                     <ReactNativePhoneInput
@@ -188,6 +229,24 @@ class EditProfile extends Component {
                         />
                     </React.Fragment>
                 );
+                break;
+            case 'clinic_name':
+            case 'clinic_address':
+            case 'years':
+            case 'expertise':
+                callback = this.updateGeneric;
+                pageContent = (
+                    <TextInput
+                        placeholder={`Enter ${beautifyName(
+                            this.field.fieldName,
+                        )}`}
+                        placeholderTextColor={'#aaa'}
+                        onChangeText={text => this.setState({newvalue: text})}
+                        returnKeyType={'next'}
+                        style={[styles.loginInput, styles.smoothShadow]}
+                    />
+                );
+                break;
             default:
                 break;
         }

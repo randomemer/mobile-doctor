@@ -1,28 +1,6 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const addR = /* GraphQL */ `
-  mutation AddR(
-    $mail_id: String!
-    $timestamp: String!
-    $bucketpath_recording: String!
-    $user_doctor: String!
-  ) {
-    addR(
-      mail_id: $mail_id
-      timestamp: $timestamp
-      bucketpath_recording: $bucketpath_recording
-      user_doctor: $user_doctor
-    ) {
-      mail_id
-      timestamp
-      bucketpath_recording
-      bucketpath_denoised
-      pulse
-      user_doctor
-    }
-  }
-`;
 export const createRecording = /* GraphQL */ `
   mutation CreateRecording($input: CreateRecordingInput!) {
     createRecording(input: $input) {
@@ -32,6 +10,14 @@ export const createRecording = /* GraphQL */ `
       bucketpath_denoised
       pulse
       user_doctor
+      doctorInfo {
+        mail_id
+        first_name
+        last_name
+        is_doctor
+        phone
+        gender
+      }
     }
   }
 `;
@@ -44,6 +30,14 @@ export const updateRecording = /* GraphQL */ `
       bucketpath_denoised
       pulse
       user_doctor
+      doctorInfo {
+        mail_id
+        first_name
+        last_name
+        is_doctor
+        phone
+        gender
+      }
     }
   }
 `;
@@ -56,6 +50,14 @@ export const deleteRecording = /* GraphQL */ `
       bucketpath_denoised
       pulse
       user_doctor
+      doctorInfo {
+        mail_id
+        first_name
+        last_name
+        is_doctor
+        phone
+        gender
+      }
     }
   }
 `;

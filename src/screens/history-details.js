@@ -21,7 +21,7 @@ class HistoryDetails extends Component {
 
     render() {
         const data = this.props.route.params;
-
+        console.log(data);
         return (
             <View style={styles.detailsContainer}>
                 <View style={styles.infoCard}>

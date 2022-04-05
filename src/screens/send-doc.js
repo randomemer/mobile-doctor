@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {
     Text,
     View,
+    Image,
     TouchableHighlight,
     FlatList,
     Modal,
@@ -17,7 +18,7 @@ import {MainContext} from '../components/main-context';
 
 // Amplify and AWS API
 import {Storage} from '@aws-amplify/storage';
-import Amplify, {Auth, API} from 'aws-amplify';
+import Amplify, {API} from 'aws-amplify';
 import * as mutations from '../graphql/mutations';
 import * as queries from '../graphql/queries';
 
@@ -26,39 +27,56 @@ for (let i = 0; i < 10; i++) {
     docs.push({title: 'Example Doctor', work: 'Brief Description'});
 }
 
+const defaultPFP = require('../../assets/default-pfp.jpg');
+
 class SendDoc extends Component {
     static contextType = MainContext;
 
     constructor(props) {
         super(props);
         this.state = {
-            data: docs,
+            data: [],
             modalVisible: false,
             audioPath: this.props.route.params,
         };
+
+        this.loadDoctors();
     }
+
+    loadDoctors = async () => {
+        try {
+            const {data} = await API.graphql({
+                query: queries.listDoctors,
+                variables: {},
+                authMode: 'API_KEY',
+            });
+            // console.log(data.listDoctors.items);
+            this.setState({data: data.listDoctors.items});
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     handleSend = async index => {
         this.setState({modalVisible: true});
         try {
             let fileName = this.state.audioPath.split('/');
             fileName = fileName[fileName.length - 1];
-            const userID = await Auth.currentAuthenticatedUser();
+            const userID = this.context.profile.mail_id;
             // console.log(userID.username, userID.attributes);
             // Convert file to blob
             let file = await fetch(`file://${this.state.audioPath}`);
             file = await file.blob();
             // Send blob to AWS S3
             const res = await Storage.put(
-                `recordings/${userID.attributes.email}/${fileName}`,
+                `recordings/${userID}/${fileName}`,
                 file,
             );
             console.log(res);
             // put recording in database
             const curDate = new Date();
-            const {attributes} = await Auth.currentAuthenticatedUser();
             const recordingData = {
-                mail_id: attributes.email,
+                mail_id: userID,
                 timestamp: `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${curDate.getMonth()}.${curDate.getFullYear()}`,
                 bucketpath_recording: `public/${res.key}`,
                 bucketpath_denoised: null,
@@ -107,10 +125,12 @@ class SendDoc extends Component {
                 onPress={() => this.handleSend(props.index)}
                 underlayColor="#6d59cc">
                 <React.Fragment>
-                    <View style={styles.docImage}></View>
+                    <Image style={styles.docImage} source={defaultPFP}></Image>
                     <View>
-                        <Text style={styles.docName}>{props.item.title}</Text>
-                        <Text>{props.item.work}</Text>
+                        <Text style={styles.docName}>
+                            {`${props.item.personalInfo.first_name} ${props.item.personalInfo.last_name}`}
+                        </Text>
+                        <Text>{props.item.expertise}</Text>
                     </View>
                 </React.Fragment>
             </TouchableHighlight>

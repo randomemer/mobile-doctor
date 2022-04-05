@@ -1,5 +1,5 @@
 import React from 'react';
 
 // Creating user context
-const defaultVal = {profile: {}}; //Insert the default value here.
+const defaultVal = {profile: {}, signOutCallback: undefined};
 export const MainContext = React.createContext(defaultVal);

@@ -1,16 +1,18 @@
 // React Components
 import React, {Component} from 'react';
-import {Image, Text, View, Alert, TouchableOpacity} from 'react-native';
+import {Image, Text, View, TouchableOpacity, ScrollView} from 'react-native';
 import styles from '../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import LoadingModal from '../components/loading-modal';
-import {MainContext} from '../components/main-context';
+import {MainContext} from '../components/main-context.js';
 
 // AWS APIs
 import * as queries from '../graphql/queries';
 import Amplify, {API} from 'aws-amplify';
+
+const defaultPFP = require('../../assets/default-pfp.jpg');
 
 class Profile extends Component {
     static contextType = MainContext;
@@ -27,19 +29,38 @@ class Profile extends Component {
 
     loadProfileData = async () => {
         this.setState({loading: true});
+        let user;
         try {
-            const {data} = await API.graphql({
-                query: queries.getUser,
-                variables: {mail_id: this.context.profile.mail_id},
-                authMode: 'API_KEY',
-            });
+            if (this.context.profile.is_doctor) {
+                const {data: docData} = await API.graphql({
+                    query: queries.fetchDoctor,
+                    variables: {mail_id: this.context.profile.mail_id},
+                    authMode: 'API_KEY',
+                });
+                user = {
+                    ...docData.fetchDoctor,
+                    ...docData.fetchDoctor.personalInfo,
+                };
+                delete user.personalInfo;
+            } else {
+                const {data} = await API.graphql({
+                    query: queries.getUser,
+                    variables: {mail_id: this.context.profile.mail_id},
+                    authMode: 'API_KEY',
+                });
+                user = data.getUser;
+            }
             // console.log(data);
-            this.setState({userData: data.getUser});
+            this.setState({userData: user});
         } catch (error) {
             console.log(error);
             this.setState({loading: false});
         }
         this.setState({loading: false});
+    };
+
+    editField = field => {
+        this.props.navigation.navigate('edit-profile', field);
     };
 
     profileField = props => {
@@ -63,50 +84,89 @@ class Profile extends Component {
         );
     };
 
-    editField = field => {
-        this.props.navigation.navigate('edit-profile', field);
-    };
-
     render() {
+        const doc = this.state.userData.is_doctor ? (
+            <View style={styles.doctorInfo}>
+                <this.profileField
+                    field="expertise"
+                    iconName="medkit"
+                    content={this.state.userData.expertise}
+                    editable={true}
+                />
+                <this.profileField
+                    field="years"
+                    iconName="calendar"
+                    content={`${this.state.userData.years} Years Experience`}
+                    editable={true}
+                />
+                <this.profileField
+                    field="clinic_name"
+                    iconName="briefcase"
+                    content={this.state.userData.clinic_name}
+                    editable={true}
+                />
+                <this.profileField
+                    field="clinic_phone"
+                    iconName="call"
+                    content={this.state.userData.clinic_phone}
+                    editable={true}
+                />
+                <this.profileField
+                    field="clinic_address"
+                    iconName="location"
+                    content={this.state.userData.clinic_address}
+                    editable={true}
+                />
+            </View>
+        ) : undefined;
+
         return (
             <SafeAreaView style={styles.profileContainer}>
-                <LoadingModal modalVisible={this.state.loading} />
-                <View style={styles.profileCard}>
-                    <Image style={styles.profileImage}></Image>
-                    <Text
-                        style={
-                            styles.profileText
-                        }>{`${this.state.userData.first_name} ${this.state.userData.last_name}`}</Text>
-                </View>
-                <View style={styles.profileInfo}>
-                    <this.profileField
-                        field="mail_id"
-                        iconName="mail"
-                        content={this.state.userData.mail_id}
-                    />
-                    <this.profileField
-                        field="password"
-                        iconName="key"
-                        content={'••••••••'}
-                        editable={true}
-                    />
-                    <this.profileField
-                        field="phone"
-                        iconName="call"
-                        content={this.state.userData.phone}
-                        editable={true}
-                    />
-                    <this.profileField
-                        field="gender"
-                        iconName="information-circle"
-                        content={`Gender : ${
-                            this.state.userData.gender
-                                ? this.state.userData.gender
-                                : ''
-                        }`}
-                        editable={true}
-                    />
-                </View>
+                <ScrollView
+                    ref={ref => (this.sv = ref)}
+                    style={styles.profileScrollView}
+                    contentContainerStyle={styles.profileScrollViewContainer}>
+                    <LoadingModal modalVisible={this.state.loading} />
+                    <View style={styles.profileCard}>
+                        <Image
+                            style={styles.profileImage}
+                            source={defaultPFP}></Image>
+                        <Text
+                            style={
+                                styles.profileText
+                            }>{`${this.state.userData.first_name} ${this.state.userData.last_name}`}</Text>
+                    </View>
+                    <View style={styles.profileInfo}>
+                        <this.profileField
+                            field="mail_id"
+                            iconName="mail"
+                            content={this.state.userData.mail_id}
+                        />
+                        <this.profileField
+                            field="password"
+                            iconName="key"
+                            content={'••••••••'}
+                            editable={true}
+                        />
+                        <this.profileField
+                            field="phone"
+                            iconName="call"
+                            content={this.state.userData.phone}
+                            editable={true}
+                        />
+                        <this.profileField
+                            field="gender"
+                            iconName="information-circle"
+                            content={`Gender : ${
+                                this.state.userData.gender
+                                    ? this.state.userData.gender
+                                    : ''
+                            }`}
+                            editable={true}
+                        />
+                    </View>
+                    {doc}
+                </ScrollView>
             </SafeAreaView>
         );
     }

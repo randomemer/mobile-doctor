@@ -11,7 +11,10 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
-// Importing the screens
+// Importing the doctor screens
+import DoctorHome from './src/screens/doctor-view/doctor-home';
+
+// Importing the patient screens
 import Home from './src/screens/home';
 import History from './src/screens/history';
 import SendDoc from './src/screens/send-doc';
@@ -28,6 +31,11 @@ import awsconfig from './aws-exports.js';
 Amplify.configure(awsconfig);
 
 const Tab = createBottomTabNavigator();
+
+// Doctor Tabs
+const DoctorHomeStack = createNativeStackNavigator();
+
+// Patient Tabs
 const HomeStack = createNativeStackNavigator();
 const HistoryStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
@@ -55,6 +63,24 @@ class HomeStackScreen extends Component {
                         headerTitleStyle: {color: '#fff'},
                     }}></HomeStack.Screen>
             </HomeStack.Navigator>
+        );
+    }
+}
+
+class DoctorHomeStackScreen extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <DoctorHomeStack.Navigator>
+                <DoctorHomeStack.Screen
+                    name="doctor-home"
+                    component={DoctorHome}
+                    options={{headerShown: false}}
+                />
+            </DoctorHomeStack.Navigator>
         );
     }
 }
@@ -93,6 +119,7 @@ class HistoryStackScreen extends Component {
 }
 
 class ProfileStackScreen extends Component {
+    static contextType = MainContext;
     constructor(props) {
         super(props);
     }
@@ -104,7 +131,7 @@ class ProfileStackScreen extends Component {
                 'You will be logged out and will have to sign in again.',
                 [
                     {text: 'Cancel', style: 'cancel'},
-                    {text: 'LOG OUT', onPress: this.props.signOutCallback},
+                    {text: 'LOG OUT', onPress: this.context.signOutCallback},
                 ],
             );
         };
@@ -150,13 +177,15 @@ class ProfileStackScreen extends Component {
 }
 
 class App extends Component {
+    static contextType = MainContext;
     constructor(props) {
         super(props);
         this.state = {
+            loading: false,
+            signUpInitiated: false,
             isLogged: this.props.prelogged,
             isDoctor: false,
-            signUpInitiated: false,
-            loading: false,
+            loggedUser: null,
         };
     }
 
@@ -193,10 +222,14 @@ class App extends Component {
                 variables: {mail_id: loginFields.userText},
                 authMode: 'API_KEY',
             });
+            // Set State in app
             this.setState({
                 isLogged: true,
+                loggedUser: data.getUser,
                 isDoctor: data.getUser.is_doctor,
             });
+            console.log('Context while login : ', this.context);
+            // this.context.
             SimpleToast.show('Logged In Successfully');
         } catch (error) {
             alert(error.message);
@@ -274,6 +307,7 @@ class App extends Component {
     };
 
     render() {
+        const isDoc = this.context?.profile?.is_doctor;
         const screen = this.state.isLogged ? (
             <NavigationContainer>
                 <Tab.Navigator
@@ -316,16 +350,19 @@ class App extends Component {
                         tabBarStyle: {},
                         headerShown: false,
                     })}>
-                    <Tab.Screen name="Home" component={HomeStackScreen} />
-                    <Tab.Screen name="History" component={HistoryStackScreen} />
-                    <Tab.Screen name="Profile">
-                        {props => (
-                            <ProfileStackScreen
-                                {...props}
-                                signOutCallback={this.signOut}
-                            />
-                        )}
-                    </Tab.Screen>
+                    <Tab.Screen
+                        name="Home"
+                        component={
+                            isDoc ? DoctorHomeStackScreen : HomeStackScreen
+                        }
+                    />
+                    {isDoc ? undefined : (
+                        <Tab.Screen
+                            name="History"
+                            component={HistoryStackScreen}
+                        />
+                    )}
+                    <Tab.Screen name="Profile" component={ProfileStackScreen} />
                 </Tab.Navigator>
             </NavigationContainer>
         ) : (
@@ -342,16 +379,41 @@ class App extends Component {
 
         return <View style={styles.appContainer}>{screen}</View>;
     }
+
+    componentDidMount() {
+        if (this.context?.profile !== null) {
+            this.setState({loggedUser: this.context.profile});
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.state.loggedUser !== null) {
+            // Set the data in the Global React Context
+            const tempObject = this.state.loggedUser;
+            this.setState({loggedUser: null});
+            this.context.setContextCallback(tempObject, this.signOut);
+        }
+    }
 }
 
 class AppWrapper extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {loaded: false, prelogged: false, profile: null};
+        this.state = {
+            loaded: false,
+            prelogged: false,
+            profile: null,
+            signOutCallback: undefined,
+            setContextCallback: this.setContext,
+        };
         this.heartIcon = require('./assets/heart-icon.png');
         this.getLastUser();
     }
+
+    setContext = (prof, func) => {
+        this.setState({profile: prof, signOutCallback: func});
+    };
 
     getLastUser = async () => {
         try {
@@ -370,7 +432,7 @@ class AppWrapper extends Component {
 
     render() {
         const curState = this.state.loaded ? (
-            <MainContext.Provider value={{profile: this.state.profile}}>
+            <MainContext.Provider value={this.state}>
                 <App prelogged={this.state.prelogged} />
             </MainContext.Provider>
         ) : (

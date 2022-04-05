@@ -22,6 +22,14 @@ export const onCreateRecording = /* GraphQL */ `
       bucketpath_denoised
       pulse
       user_doctor
+      doctorInfo {
+        mail_id
+        first_name
+        last_name
+        is_doctor
+        phone
+        gender
+      }
     }
   }
 `;
@@ -46,6 +54,14 @@ export const onUpdateRecording = /* GraphQL */ `
       bucketpath_denoised
       pulse
       user_doctor
+      doctorInfo {
+        mail_id
+        first_name
+        last_name
+        is_doctor
+        phone
+        gender
+      }
     }
   }
 `;
@@ -70,6 +86,14 @@ export const onDeleteRecording = /* GraphQL */ `
       bucketpath_denoised
       pulse
       user_doctor
+      doctorInfo {
+        mail_id
+        first_name
+        last_name
+        is_doctor
+        phone
+        gender
+      }
     }
   }
 `;
