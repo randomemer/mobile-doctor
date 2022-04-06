@@ -9,21 +9,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-import styles from '../Styles';
-import {MainContext} from '../components/main-context';
+import {MainContext} from '../../components/main-context';
+import {extractTime} from '../../components/utilities';
+import styles from '../../Styles';
 
 // AWS APIs
-import * as queries from '../graphql/queries';
+import * as queries from '../../graphql/queries';
 import Amplify, {API} from 'aws-amplify';
-
-function extractTime(string) {
-    const [time, date] = string.split('-');
-
-    const [hrs, min, sec] = time.split('.');
-    const [day, month, year] = date.split('.');
-
-    return new Date(year, month - 1, day, hrs, min, sec).toLocaleString();
-}
 
 class History extends Component {
     static contextType = MainContext;

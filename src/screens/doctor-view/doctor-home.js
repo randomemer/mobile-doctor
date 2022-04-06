@@ -15,21 +15,11 @@ import styles from '../../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {MainContext} from '../../components/main-context';
+import {extractTime, defaultPFP} from '../../components/utilities';
 
 // AWS APIs
 import * as queries from '../../graphql/queries';
 import Amplify, {Auth, API} from 'aws-amplify';
-
-function extractTime(string) {
-    const [time, date] = string.split('-');
-
-    const [hrs, min, sec] = time.split('.');
-    const [day, month, year] = date.split('.');
-
-    return new Date(year, month - 1, day, hrs, min, sec).toLocaleString();
-}
-
-const defaultPFP = require('../../../assets/default-pfp.jpg');
 
 class DoctorHome extends Component {
     static contextType = MainContext;
@@ -67,8 +57,8 @@ class DoctorHome extends Component {
             );
 
             this.sections = [
-                {title: 'Pending', data: pending},
-                {title: 'Reviewed', data: reviewed},
+                {title: 'Pending', data: pending.reverse()}, // change back to original order after modifying resolver in cloud
+                {title: 'Reviewed', data: reviewed.reverse()},
             ];
             // this.setState({dummyUpdateVar: !this.state.dummyUpdateVar});
         } catch (error) {

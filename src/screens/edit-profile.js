@@ -18,8 +18,7 @@ import {MainContext} from '../components/main-context';
 // AWS APIs
 import * as mutations from '../graphql/mutations';
 import Amplify, {Auth, API} from 'aws-amplify';
-import LoadingModal from '../components/loading-modal';
-import {up} from 'inquirer/lib/utils/readline';
+import {LoadingModal} from '../components/utilities';
 
 function beautifyName(string) {
     return string

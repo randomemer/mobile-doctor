@@ -10,13 +10,15 @@ import {
     TouchableOpacity,
     Image,
 } from 'react-native';
-import styles from '../Styles';
+import styles, {colors} from '../Styles';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {PasswordInput} from '../components/utilities';
 import {TabView} from 'react-native-tab-view';
 
 class LoginPane extends Component {
     constructor(props) {
         super(props);
-        this.state = {userText: '', pwdText: ''};
+        this.state = {userText: '', pwdText: '', hidePassword: true};
 
         this.initialState = this.state;
     }
@@ -37,15 +39,14 @@ class LoginPane extends Component {
                         onChangeText={text => this.setState({userText: text})}
                         returnKeyType={'next'}
                     />
-                    <TextInput
+                    <PasswordInput
                         placeholder="Password"
                         placeholderTextColor={'#aaa'}
-                        secureTextEntry={true}
                         onChangeText={text => this.setState({pwdText: text})}
                         onSubmitEditing={() =>
                             this.props.loginCallback(this.state)
                         }
-                        style={styles.loginInput}
+                        style={styles.loginPasswordInput}
                     />
                     <Text
                         style={styles.forgotPwd}

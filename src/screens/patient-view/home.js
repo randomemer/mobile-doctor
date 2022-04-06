@@ -7,9 +7,12 @@ import {
     TouchableHighlight,
     Platform,
     PermissionsAndroid,
+    ScrollView,
+    Modal,
+    Alert,
 } from 'react-native';
 import SimpleToast from 'react-native-simple-toast';
-import styles from '../Styles';
+import styles, {colors} from '../../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
@@ -52,29 +55,59 @@ function SendButton(props) {
         <TouchableHighlight
             style={styles.sendToDocButton}
             onPress={() => navigation.navigate('send-screen', props.audiofile)}
-            underlayColor={'#007e97'}>
+            underlayColor={colors.pacificBlueDim}>
             <Icon name="send" size={24} color={'white'} />
         </TouchableHighlight>
     );
 }
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function AsyncDeleteAlert() {
+    return new Promise(resolve => {
+        Alert.alert(
+            'Delete Recording?',
+            '',
+            [
+                {
+                    text: 'cancel',
+                    onPress: () => {
+                        resolve(false);
+                    },
+                },
+                {
+                    text: 'delete',
+                    onPress: () => {
+                        resolve(true);
+                    },
+                },
+            ],
+            {cancelable: false},
+        );
+    });
+}
 class Home extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            recordTimeString: '00:00',
-            isRecording: false,
-            recordTime: 0,
-            // audioPath: '/storage/emulated/0/Music/recording.mp3',
             audioPath: '',
-            finishedRecording: false, // change it back to false later
-            audioLength: 0,
-            isPlaying: false,
+            recordTimeString: '00:00',
+            recordTime: 0,
             playTime: 0,
+            countdown: 3,
+            // audioPath: '/storage/emulated/0/Music/recording.mp3',
+            sliderValue: 0,
+            audioLength: 0,
+            // status variables
+            isRecording: false,
+            finishedRecording: false, // change it back to false later
+            isPlaying: false,
             playerActive: false,
             sliding: false,
-            sliderValue: 0,
+            counting: false,
         };
         this.initialState = this.state;
         this.audioRecorderPlayer = new AudioRecorderPlayer();
@@ -84,13 +117,27 @@ class Home extends Component {
     }
 
     updateTimer() {
-        const minutes = (this.state.recordTime / 60).toFixed(0);
+        const minutes = Math.floor(this.state.recordTime / 60);
         const seconds = this.state.recordTime % 60;
         const timerString = `${minutes.toString().padStart(2, '0')}:${seconds
             .toString()
             .padStart(2, '0')}`;
         this.setState({recordTimeString: timerString});
+
+        if (this.state.recordTime === 30) {
+            this.onStopRecord();
+        }
     }
+
+    startCountdown = async () => {
+        this.setState({countdown: 3, counting: true});
+        for (let index = 0; index < 3; index++) {
+            await timeout(1000);
+            this.setState({countdown: this.state.countdown - 1});
+        }
+        this.setState({counting: false});
+        this.onStartRecord();
+    };
 
     Player = props => {
         const playing = this.state.isPlaying;
@@ -125,7 +172,7 @@ class Home extends Component {
         };
 
         return (
-            <View style={styles.audioPlayer}>
+            <View style={[styles.audioPlayer]}>
                 <TouchableHighlight
                     onPress={callback}
                     underlayColor={'rgba(255,255,255,0.3)'}
@@ -146,7 +193,7 @@ class Home extends Component {
                     style={styles.slider}></Slider>
                 <TouchableHighlight
                     onPress={() => this.deleteRecording()}
-                    underlayColor={'#b32022'}
+                    underlayColor={colors.mainThemeDim}
                     style={styles.deleteRecordingButton}>
                     <Icon name="trash" size={24} color={'white'} />
                 </TouchableHighlight>
@@ -154,10 +201,24 @@ class Home extends Component {
         );
     };
 
+    Tip = props => {
+        return (
+            <View style={styles.tipBox}>
+                <Icon
+                    name="information-circle"
+                    color={'white'}
+                    size={30}
+                    style={styles.tipIcon}
+                />
+                <Text style={styles.tipText}>{props.content}</Text>
+            </View>
+        );
+    };
+
     render() {
         const recordBtnCallback = this.state.isRecording
             ? () => this.onStopRecord()
-            : () => this.onStartRecord();
+            : () => this.startCountdown();
         const btnIcon = this.state.isRecording ? (
             <Icon
                 name="stop-outline"
@@ -176,6 +237,13 @@ class Home extends Component {
 
         return (
             <View style={styles.container}>
+                <Modal transparent={true} visible={this.state.counting}>
+                    <View style={styles.countdownModal}>
+                        <Text style={styles.countdownText}>
+                            {this.state.countdown}
+                        </Text>
+                    </View>
+                </Modal>
                 <Text style={styles.recordScreenTitle}>
                     Record Your Heart Beat!
                 </Text>
@@ -201,6 +269,23 @@ class Home extends Component {
                     ]}>
                     <this.Player enabled={this.state.finishedRecording} />
                     <SendButton audiofile={this.state.audioPath} />
+                </View>
+                <View style={styles.tipsBox}>
+                    <Text style={styles.tipTitle}>Some tips :</Text>
+                    <ScrollView style={styles.tipsScrollBox}>
+                        <this.Tip
+                            content={`Before you start, make sure you're in a place with minimal external noise.`}
+                        />
+                        <this.Tip
+                            content={`Keep your phone's microphone as close as possible to your chest. Consider removing your phone cover and clothing if neccessary`}
+                        />
+                        <this.Tip
+                            content={`Press the mic button to start recording. A short countdown will start to help you get ready.`}
+                        />
+                        <this.Tip
+                            content={`You can record upto 30 seconds. When you're done, you can listen to your recording before sending to us. If you think your recording isn't perfect, you can delete it and record it again.`}
+                        />
+                    </ScrollView>
                 </View>
             </View>
         );
@@ -317,6 +402,15 @@ class Home extends Component {
 
     deleteRecording = async () => {
         try {
+            // Ask confirmation
+            this.res = await AsyncDeleteAlert();
+            if (!this.res) {
+                return;
+            }
+            // Stop playing if already playing
+            this.audioRecorderPlayer.removePlayBackListener();
+            this.audioRecorderPlayer.stopPlayer();
+            // Delete file
             const exist = await reactNativeFetchBlob.fs.exists(
                 this.state.audioPath,
             );
@@ -332,6 +426,7 @@ class Home extends Component {
     };
 
     componentWillUnmount() {
+        console.log('Home unmounted');
         this.audioRecorderPlayer.removePlayBackListener();
         this.audioRecorderPlayer.removeRecordBackListener();
         this.audioRecorderPlayer.stopPlayer();

@@ -12,22 +12,16 @@ import {
 import SimpleToast from 'react-native-simple-toast';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
-import styles from '../Styles';
+import styles from '../../Styles';
 import {useNavigation} from '@react-navigation/native';
-import {MainContext} from '../components/main-context';
+import {MainContext} from '../../components/main-context';
+import {defaultPFP} from '../../components/utilities';
 
 // Amplify and AWS API
 import {Storage} from '@aws-amplify/storage';
 import Amplify, {API} from 'aws-amplify';
-import * as mutations from '../graphql/mutations';
-import * as queries from '../graphql/queries';
-
-const docs = [];
-for (let i = 0; i < 10; i++) {
-    docs.push({title: 'Example Doctor', work: 'Brief Description'});
-}
-
-const defaultPFP = require('../../assets/default-pfp.jpg');
+import * as mutations from '../../graphql/mutations';
+import * as queries from '../../graphql/queries';
 
 class SendDoc extends Component {
     static contextType = MainContext;

@@ -1,34 +1,39 @@
 import {StyleSheet} from 'react-native';
 
-const colors = {
+export const colors = {
     mainTheme: '#ff5456',
+    mainThemeDim: '#b33b3c',
+    davysGrey: '#525252',
+    gainsboro: '#E6E6EA',
+    pacificBlue: '#009FB7',
+    pacificBlueDim: '#006f80',
 };
 
 const styles = StyleSheet.create({
     // Loading Screen
     loadingScreen: {
         flex: 1,
-        backgroundColor: '#E6E6EA',
+        backgroundColor: colors.gainsboro,
         alignItems: 'center',
         justifyContent: 'center',
     },
     // Main App Container
     appContainer: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: 'white',
     },
     // LOGIN SECTION
     loginContainer: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'flex-start',
-        backgroundColor: '#E6E6EA',
+        backgroundColor: colors.gainsboro,
     },
     loginTabView: {
         display: 'flex',
         width: '100%',
         height: '60%',
-        backgroundColor: '#525252',
+        backgroundColor: colors.davysGrey,
         borderRadius: 10,
         elevation: 3,
     },
@@ -55,15 +60,19 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     loginInput: {
+        // flex: 1,
         height: 50,
         fontSize: 18,
+        display: 'flex',
+        flexDirection: 'row',
         paddingLeft: 10,
-        alignSelf: 'stretch',
         backgroundColor: 'white',
         marginBottom: 20,
         color: '#333',
         borderRadius: 10,
+        alignItems: 'center',
     },
+    loginPasswordInput: {flex: 1, fontSize: 18, color: '#333'},
     inputFields: {
         display: 'flex',
         flexDirection: 'column',
@@ -71,7 +80,7 @@ const styles = StyleSheet.create({
     },
     loginButton: {
         width: '50%',
-        backgroundColor: '#9D44B5',
+        backgroundColor: colors.mainTheme,
         alignItems: 'center',
         paddingVertical: 10,
         borderRadius: 5,
@@ -97,7 +106,7 @@ const styles = StyleSheet.create({
         padding: 12,
         color: 'black',
         // iOS shadow
-        shadowColor: '#000',
+        shadowColor: 'black',
         shadowOffset: {
             width: 0,
             height: 1,
@@ -109,11 +118,17 @@ const styles = StyleSheet.create({
     },
     container: {
         backgroundColor: '#eeeeee',
-        width: '100%',
-        height: '100%',
+        flex: 1,
         paddingHorizontal: '5%',
         paddingTop: '5%',
     },
+    countdownModal: {
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    countdownText: {fontSize: 54, color: 'white', fontWeight: '600'},
     recordButton: {
         height: 75,
         width: 75,
@@ -148,21 +163,23 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         height: 50,
         justifyContent: 'space-between',
+        marginBottom: '7.5%',
     },
     audioPlayer: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#525252',
+        backgroundColor: colors.davysGrey,
         justifyContent: 'space-between',
-        width: '82.5%',
+        flex: 1,
         paddingHorizontal: 10,
         borderRadius: 5,
+        marginRight: '2.5%',
     },
     slider: {width: '70%'},
     playIcon: {},
     sendToDocButton: {
-        backgroundColor: '#00b4d8',
+        backgroundColor: colors.pacificBlue,
         height: 50,
         width: 50,
         borderRadius: 25,
@@ -171,13 +188,31 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     deleteRecordingButton: {
-        backgroundColor: '#ff2e31',
+        backgroundColor: colors.mainTheme,
         height: 40,
         width: 40,
         borderRadius: 50 / 2,
         alignItems: 'center',
         justifyContent: 'center',
     },
+    tipTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: '5%',
+    },
+    tipsBox: {flex: 1},
+    tipsScrollBox: {flex: 1},
+    tipBox: {
+        display: 'flex',
+        flexDirection: 'row',
+        backgroundColor: colors.pacificBlue,
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: '3.5%',
+    },
+    tipIcon: {marginRight: 15},
+    tipText: {color: 'white', fontSize: 16, fontWeight: '500', flex: 1},
     // SEND TO DOCTOR SCREEN
     docContainer: {
         flex: 1,
@@ -208,7 +243,7 @@ const styles = StyleSheet.create({
     },
     docName: {
         fontSize: 20,
-        color: '#fff',
+        color: 'white',
     },
     modalBoxWrapper: {
         flex: 1,
@@ -232,7 +267,7 @@ const styles = StyleSheet.create({
     docNameRow: {},
     docNameText: {
         fontSize: 22,
-        color: '#fff',
+        color: 'white',
         fontWeight: 'bold',
         marginBottom: 10,
     },
@@ -242,7 +277,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     infoRowText: {
-        color: '#fff',
+        color: 'white',
         fontSize: 14,
     },
     infoRowIcon: {
@@ -268,7 +303,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     rowIcon: {
-        color: '#ff5456',
+        color: colors.mainTheme,
         marginRight: 10,
     },
     rowInfoText: {
@@ -283,14 +318,16 @@ const styles = StyleSheet.create({
     },
     profileScrollView: {
         flex: 1,
+        paddingVertical: 30,
+        paddingHorizontal: 30,
         // paddingBottom: 60,
     },
     profileScrollViewContainer: {
-        alignItems: 'center',
-        paddingVertical: 50,
+        // alignItems: 'center',
+        // paddingVertical: 50,
     },
     profileHeaderStyle: {
-        backgroundColor: '#ff5456',
+        backgroundColor: colors.mainTheme,
         paddingHorizontal: '5%',
         height: 57.5,
         display: 'flex',
@@ -300,20 +337,18 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
     },
     profileHeaderText: {
-        color: '#fff',
+        color: 'white',
         fontSize: 20,
         textTransform: 'uppercase',
         fontWeight: 'bold',
         letterSpacing: 1,
     },
     profileCard: {
-        height: '30%',
-        width: '90%',
+        height: 200,
         borderRadius: 10,
-        // marginTop: '5%',
         alignItems: 'center',
         justifyContent: 'space-evenly',
-        backgroundColor: '#525252',
+        backgroundColor: colors.davysGrey,
     },
     profileImage: {
         width: 100,
@@ -324,24 +359,24 @@ const styles = StyleSheet.create({
     profileText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#fff',
+        color: 'white',
     },
     profileInfo: {
         marginTop: '15%',
         display: 'flex',
         flexDirection: 'column',
-        width: '82.5%',
     },
     doctorInfo: {
         marginTop: '15%',
         display: 'flex',
         flexDirection: 'column',
-        width: '82.5%',
+        marginBottom: '10%',
     },
     profileField: {
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'center',
+        // alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: '5%',
     },
     profileFieldIcon: {
@@ -351,6 +386,8 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: '#333',
+        flex: 1,
+        flexWrap: 'wrap',
     },
     logoutButton: {
         borderRadius: 30,
@@ -380,7 +417,7 @@ const styles = StyleSheet.create({
         height: 60,
         width: 60,
         borderRadius: 60 / 2,
-        backgroundColor: '#009FB7',
+        backgroundColor: colors.pacificBlue,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -449,7 +486,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#525252',
+        backgroundColor: colors.davysGrey,
         justifyContent: 'space-between',
         width: '90%',
         height: 55,

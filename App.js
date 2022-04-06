@@ -16,10 +16,10 @@ import DoctorHome from './src/screens/doctor-view/doctor-home';
 import RespondScreen from './src/screens/doctor-view/respond-screen';
 
 // Importing the patient screens
-import Home from './src/screens/home';
-import History from './src/screens/history';
-import SendDoc from './src/screens/send-doc';
-import HistoryDetails from './src/screens/history-details';
+import Home from './src/screens/patient-view/home';
+import History from './src/screens/patient-view/history';
+import SendDoc from './src/screens/patient-view/send-doc';
+import HistoryDetails from './src/screens/patient-view/history-details';
 import LoginView from './src/screens/login';
 import Profile from './src/screens/profile';
 import EditProfile from './src/screens/edit-profile';

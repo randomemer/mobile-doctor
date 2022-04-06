@@ -4,11 +4,9 @@ import {
     TextInput,
     View,
     TouchableHighlight,
-    FlatList,
     Alert,
     ScrollView,
     ActivityIndicator,
-    SectionList,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import styles from '../../Styles';
@@ -18,21 +16,12 @@ import Slider from '@react-native-community/slider';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {MainContext} from '../../components/main-context';
 import RNFetchBlob from 'react-native-fetch-blob';
+import {extractTime} from '../../components/utilities';
 
 // AWS APIs
-import * as queries from '../../graphql/queries';
 import * as mutations from '../../graphql/mutations';
 import Amplify, {Auth, API} from 'aws-amplify';
 import {Storage} from 'aws-amplify';
-
-function extractTime(string) {
-    const [time, date] = string.split('-');
-
-    const [hrs, min, sec] = time.split('.');
-    const [day, month, year] = date.split('.');
-
-    return new Date(year, month - 1, day, hrs, min, sec).toLocaleString();
-}
 
 class RespondView extends Component {
     static contextType = MainContext;
@@ -395,6 +384,7 @@ class RespondView extends Component {
     }
 
     componentDidMount() {
+        console.log(this.state);
         this.downloadAudio();
     }
 

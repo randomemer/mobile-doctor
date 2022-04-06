@@ -5,14 +5,12 @@ import styles from '../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import LoadingModal from '../components/loading-modal';
 import {MainContext} from '../components/main-context.js';
+import {LoadingModal, defaultPFP} from '../components/utilities';
 
 // AWS APIs
 import * as queries from '../graphql/queries';
 import Amplify, {API} from 'aws-amplify';
-
-const defaultPFP = require('../../assets/default-pfp.jpg');
 
 class Profile extends Component {
     static contextType = MainContext;
