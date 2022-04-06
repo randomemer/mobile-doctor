@@ -14,7 +14,7 @@ import {MainContext} from '../components/main-context';
 
 // AWS APIs
 import * as queries from '../graphql/queries';
-import Amplify, {Auth, API} from 'aws-amplify';
+import Amplify, {API} from 'aws-amplify';
 
 function extractTime(string) {
     const [time, date] = string.split('-');
@@ -29,11 +29,12 @@ class History extends Component {
     static contextType = MainContext;
     constructor(props) {
         super(props);
-        this.state = {interactions: []};
+        this.state = {interactions: [], refreshing: false};
     }
 
     loadHistory = async () => {
         // console.log(this.context);
+        this.setState({refreshing: true});
         try {
             const {data} = await API.graphql({
                 query: queries.listRecordings,
@@ -43,16 +44,17 @@ class History extends Component {
                 authMode: 'API_KEY',
             });
             // console.log(data.listRecordings.items);
-            this.setState({interactions: data.listRecordings.items});
+            this.setState({interactions: data.listRecordings.items.reverse()});
+
             extractTime(data.listRecordings.items[0].timestamp);
         } catch (error) {
             console.log(error);
         }
+        this.setState({refreshing: false});
     };
 
     interactionCard(props) {
-        const curStatus =
-            props.item.bucketpath_denoised === null ? 'Pending' : 'Reviewed';
+        const curStatus = props.item.comment === null ? 'Pending' : 'Reviewed';
 
         const bgColor = curStatus === 'Pending' ? '#F49F0A' : '#00A6A6';
         const activeBgColor = curStatus === 'Pending' ? '#ab6f07' : '#007474';
@@ -100,7 +102,10 @@ class History extends Component {
                     data={this.state.interactions}
                     contentContainerStyle={styles.interactionsContainer}
                     renderItem={this.interactionCard.bind(this)}
-                    ItemSeparatorComponent={gap}></FlatList>
+                    ItemSeparatorComponent={gap}
+                    refreshing={this.state.refreshing}
+                    onRefresh={this.loadHistory}
+                />
             </SafeAreaView>
         );
     }

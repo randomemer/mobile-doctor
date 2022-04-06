@@ -68,7 +68,7 @@ class Home extends Component {
             recordTime: 0,
             // audioPath: '/storage/emulated/0/Music/recording.mp3',
             audioPath: '',
-            finishedRecording: true, // change it back to false later
+            finishedRecording: false, // change it back to false later
             audioLength: 0,
             isPlaying: false,
             playTime: 0,

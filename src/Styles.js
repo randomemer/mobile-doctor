@@ -1,5 +1,9 @@
 import {StyleSheet} from 'react-native';
 
+const colors = {
+    mainTheme: '#ff5456',
+};
+
 const styles = StyleSheet.create({
     // Loading Screen
     loadingScreen: {
@@ -405,14 +409,12 @@ const styles = StyleSheet.create({
         color: '#333',
         fontSize: 32,
         fontWeight: 'bold',
-        marginBottom: '7.5%',
-        backgroundColor: 'green',
+        marginBottom: '10%',
     },
-    doctorRequests: {paddingHorizontal: 25},
+    doctorRequests: {paddingHorizontal: 25, paddingTop: 25},
     docSectionHeader: {
         display: 'flex',
         flexDirection: 'row',
-        // marginBottom: 20,
         alignItems: 'center',
     },
     docSectionText: {
@@ -428,6 +430,59 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignSelf: 'center',
         padding: 20,
+    },
+    // *************************
+    // **** DOCTOR RESPONSE ****
+    // *************************
+    doctorResponseContainer: {flex: 1},
+    doctorResponseScroll: {
+        paddingHorizontal: '5%',
+        paddingVertical: '5%',
+    },
+    infoSection: {marginBottom: 35},
+    patientInfoTextBox: {},
+    patientInfoText: {
+        color: '#333',
+        fontSize: 18,
+    },
+    audioPlayerDoctor: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#525252',
+        justifyContent: 'space-between',
+        width: '90%',
+        height: 55,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+    },
+    doctorSlider: {
+        flex: 9,
+    },
+    commentArea: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+    },
+    commentContent: {
+        flex: 1,
+        fontSize: 18,
+        paddingLeft: 10,
+        backgroundColor: 'white',
+        marginBottom: 20,
+        color: '#333',
+        alignSelf: 'stretch',
+        borderRadius: 10,
+    },
+    commentButton: {
+        backgroundColor: colors.mainTheme,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 50,
+        width: 50,
+        borderRadius: 50 / 2,
+        marginLeft: 15,
     },
 });
 

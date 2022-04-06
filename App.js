@@ -13,6 +13,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 // Importing the doctor screens
 import DoctorHome from './src/screens/doctor-view/doctor-home';
+import RespondScreen from './src/screens/doctor-view/respond-screen';
 
 // Importing the patient screens
 import Home from './src/screens/home';
@@ -79,6 +80,17 @@ class DoctorHomeStackScreen extends Component {
                     name="doctor-home"
                     component={DoctorHome}
                     options={{headerShown: false}}
+                />
+                <DoctorHomeStack.Screen
+                    name="respond-screen"
+                    component={RespondScreen}
+                    options={{
+                        title: 'Respond',
+                        headerStyle: {
+                            backgroundColor: '#ff5456',
+                        },
+                        headerTitleStyle: {color: '#fff'},
+                    }}
                 />
             </DoctorHomeStack.Navigator>
         );

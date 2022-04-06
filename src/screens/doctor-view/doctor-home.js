@@ -36,7 +36,7 @@ class DoctorHome extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {dummyUpdateVar: false};
+        this.state = {refreshing: false};
 
         this.sections = [
             {title: 'Pending', data: []},
@@ -45,6 +45,7 @@ class DoctorHome extends Component {
     }
 
     getRequests = async () => {
+        this.setState({refreshing: true});
         try {
             const {data} = await API.graphql({
                 query: queries.listRecordingsToDoctor,
@@ -59,24 +60,25 @@ class DoctorHome extends Component {
 
             // Could be optimized to single loop
             const pending = data.listRecordingsToDoctor.items.filter(
-                item => item.bucketpath_denoised === null,
+                item => item.comment === null,
             );
             const reviewed = data.listRecordingsToDoctor.items.filter(
-                item => item.bucketpath_denoised !== null,
+                item => item.comment !== null,
             );
 
             this.sections = [
                 {title: 'Pending', data: pending},
                 {title: 'Reviewed', data: reviewed},
             ];
-            this.setState({dummyUpdateVar: !this.state.dummyUpdateVar});
+            // this.setState({dummyUpdateVar: !this.state.dummyUpdateVar});
         } catch (error) {
             console.log(error);
         }
+        this.setState({refreshing: false});
     };
 
     respond(item) {
-        console.log(item);
+        this.props.navigation.navigate('respond-screen', item);
     }
 
     sectionHeader = props => {
@@ -115,7 +117,7 @@ class DoctorHome extends Component {
             <TouchableHighlight
                 style={[styles.docRequestCard, {backgroundColor: bgColor}]}
                 key={props.index}
-                onPress={() => this.respond(props.index)}
+                onPress={() => this.respond(props.item)}
                 underlayColor={activeBgColor}>
                 <React.Fragment>
                     <Image style={styles.docImage} source={defaultPFP}></Image>
@@ -143,13 +145,17 @@ class DoctorHome extends Component {
             <SafeAreaView style={styles.docHomeContainer}>
                 <SectionList
                     sections={this.sections}
-                    keyExtractor={(item, index) => item + index}
+                    keyExtractor={(item, index) =>
+                        index.toString() + item.section
+                    }
                     renderSectionHeader={this.sectionHeader}
                     renderItem={this.itemRenderer}
                     ItemSeparatorComponent={itemGap}
                     SectionSeparatorComponent={sectionGap}
                     style={styles.doctorRequests}
                     ListHeaderComponent={title}
+                    refreshing={this.state.refreshing}
+                    onRefresh={this.getRequests}
                 />
             </SafeAreaView>
         );

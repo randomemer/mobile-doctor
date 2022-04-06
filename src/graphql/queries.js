@@ -8,7 +8,7 @@ export const getRecording = /* GraphQL */ `
             timestamp
             bucketpath_recording
             bucketpath_denoised
-            pulse
+            bpm
             user_doctor
             doctorInfo {
                 mail_id
@@ -18,6 +18,8 @@ export const getRecording = /* GraphQL */ `
                 phone
                 gender
             }
+            audio_length
+            comment
         }
     }
 `;
@@ -33,8 +35,10 @@ export const listRecordings = /* GraphQL */ `
                 timestamp
                 bucketpath_recording
                 bucketpath_denoised
-                pulse
+                bpm
                 user_doctor
+                audio_length
+                comment
                 doctorInfo {
                     first_name
                     gender
@@ -64,15 +68,17 @@ export const listRecordingsToDoctor = /* GraphQL */ `
                 timestamp
                 bucketpath_recording
                 bucketpath_denoised
-                pulse
+                bpm
                 user_doctor
+                audio_length
+                comment
                 userInfo {
                     first_name
                     gender
                     is_doctor
                     last_name
-                    mail_id
                     phone
+                    mail_id
                 }
             }
             nextToken

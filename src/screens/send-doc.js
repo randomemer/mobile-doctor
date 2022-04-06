@@ -60,9 +60,11 @@ class SendDoc extends Component {
     handleSend = async index => {
         this.setState({modalVisible: true});
         try {
+            console.log(this.state.data[index]);
             let fileName = this.state.audioPath.split('/');
             fileName = fileName[fileName.length - 1];
             const userID = this.context.profile.mail_id;
+
             // console.log(userID.username, userID.attributes);
             // Convert file to blob
             let file = await fetch(`file://${this.state.audioPath}`);
@@ -74,21 +76,22 @@ class SendDoc extends Component {
             );
             console.log(res);
             // put recording in database
-            const curDate = new Date();
             const recordingData = {
                 mail_id: userID,
-                timestamp: `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${curDate.getMonth()}.${curDate.getFullYear()}`,
+                user_doctor: this.state.data[index].mail_id,
+                timestamp: fileName.slice(2).replace('.wav', ''),
                 bucketpath_recording: `public/${res.key}`,
                 bucketpath_denoised: null,
-                pulse: null,
-                user_doctor: 'mydoc@gmail.com',
+                bpm: null,
+                comment: null,
+                audio_length: null,
             };
-            const response = API.graphql({
+            const response = await API.graphql({
                 query: mutations.createRecording,
                 variables: {input: recordingData},
                 authMode: 'API_KEY',
             });
-            console.log(response);
+            // console.log(response);
             // Show modal dialog
             Alert.alert(
                 'Successfully Sent!',

@@ -20,7 +20,7 @@ export const onCreateRecording = /* GraphQL */ `
       timestamp
       bucketpath_recording
       bucketpath_denoised
-      pulse
+      bpm
       user_doctor
       doctorInfo {
         mail_id
@@ -30,6 +30,8 @@ export const onCreateRecording = /* GraphQL */ `
         phone
         gender
       }
+      audio_length
+      comment
     }
   }
 `;
@@ -52,7 +54,7 @@ export const onUpdateRecording = /* GraphQL */ `
       timestamp
       bucketpath_recording
       bucketpath_denoised
-      pulse
+      bpm
       user_doctor
       doctorInfo {
         mail_id
@@ -62,6 +64,8 @@ export const onUpdateRecording = /* GraphQL */ `
         phone
         gender
       }
+      audio_length
+      comment
     }
   }
 `;
@@ -84,7 +88,7 @@ export const onDeleteRecording = /* GraphQL */ `
       timestamp
       bucketpath_recording
       bucketpath_denoised
-      pulse
+      bpm
       user_doctor
       doctorInfo {
         mail_id
@@ -94,6 +98,8 @@ export const onDeleteRecording = /* GraphQL */ `
         phone
         gender
       }
+      audio_length
+      comment
     }
   }
 `;

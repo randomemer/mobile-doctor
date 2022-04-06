@@ -14,6 +14,17 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import styles from '../Styles';
 
+function extractTime(string) {
+    const [time, date] = string.split('-');
+
+    const [hrs, min, sec] = time.split('.');
+    const [day, month, year] = date.split('.');
+
+    return new Date(year, month - 1, day, hrs, min, sec).toLocaleString();
+}
+
+const defaultPFP = require('../../assets/default-pfp.jpg');
+
 class HistoryDetails extends Component {
     constructor(props) {
         super(props);
@@ -21,6 +32,7 @@ class HistoryDetails extends Component {
 
     render() {
         const data = this.props.route.params;
+        const responded = data.comment === null;
         console.log(data);
         return (
             <View style={styles.detailsContainer}>
@@ -30,15 +42,15 @@ class HistoryDetails extends Component {
                             name="send"
                             style={styles.rowIcon}
                             size={30}></Icon>
-                        <Text style={styles.rowTitleText}>Doctor</Text>
+                        <Text style={styles.rowTitleText}>DOCTOR</Text>
                     </View>
                     <View style={[styles.card, {alignSelf: 'flex-start'}]}>
-                        <View style={styles.docImage}></View>
+                        <Image style={styles.docImage} source={defaultPFP} />
                         <View>
                             <Text style={styles.docName}>
-                                {data.doctorInfo.name}
+                                {`${data.doctorInfo.first_name} ${data.doctorInfo.last_name}`}
                             </Text>
-                            <Text>{data.doctorInfo.desc}</Text>
+                            <Text>{data.doctorInfo.phone}</Text>
                         </View>
                     </View>
                 </View>
@@ -50,7 +62,11 @@ class HistoryDetails extends Component {
                             size={30}></Icon>
                         <Text style={styles.rowTitleText}>Status</Text>
                     </View>
-                    <Text style={styles.rowInfoText}>{data.status}</Text>
+                    <Text style={styles.rowInfoText}>
+                        {data.comment === null
+                            ? 'Waiting for response from your doctor'
+                            : 'Doctor has responded'}
+                    </Text>
                 </View>
                 <View style={styles.infoCard}>
                     <View style={styles.titleRow}>
@@ -60,7 +76,9 @@ class HistoryDetails extends Component {
                             size={30}></Icon>
                         <Text style={styles.rowTitleText}>Date Sent</Text>
                     </View>
-                    <Text style={styles.rowInfoText}>{data.time}</Text>
+                    <Text style={styles.rowInfoText}>
+                        {extractTime(data.timestamp)}
+                    </Text>
                 </View>
                 <View style={styles.infoCard}>
                     <View style={styles.titleRow}>
@@ -70,7 +88,9 @@ class HistoryDetails extends Component {
                             size={30}></Icon>
                         <Text style={styles.rowTitleText}>Our Analysis</Text>
                     </View>
-                    <Text style={styles.rowInfoText}>{data.analysis}</Text>
+                    <Text style={styles.rowInfoText}>{`BPM : ${
+                        data.bpm
+                    }, Condition : ${''}`}</Text>
                 </View>
                 <View style={styles.infoCard}>
                     <View style={styles.titleRow}>
@@ -82,7 +102,7 @@ class HistoryDetails extends Component {
                             Doctor's Response
                         </Text>
                     </View>
-                    <Text style={styles.rowInfoText}>{data.comments}</Text>
+                    <Text style={styles.rowInfoText}>{data.comment}</Text>
                 </View>
             </View>
         );
