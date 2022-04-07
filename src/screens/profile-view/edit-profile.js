@@ -8,17 +8,17 @@ import {
     TouchableHighlight,
     TextInput,
 } from 'react-native';
-import styles from '../Styles';
+import styles from '../../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import ReactNativePhoneInput from 'react-native-phone-input';
-import DropdownComponent from '../components/dropdown';
-import {MainContext} from '../components/main-context';
+import DropdownComponent from '../../components/dropdown';
+import {MainContext} from '../../components/main-context';
 
 // AWS APIs
-import * as mutations from '../graphql/mutations';
+import * as mutations from '../../graphql/mutations';
 import Amplify, {Auth, API} from 'aws-amplify';
-import {LoadingModal} from '../components/utilities';
+import {LoadingModal} from '../../components/utilities';
 
 function beautifyName(string) {
     return string

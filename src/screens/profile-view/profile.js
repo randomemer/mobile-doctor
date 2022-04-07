@@ -1,15 +1,15 @@
 // React Components
 import React, {Component} from 'react';
 import {Image, Text, View, TouchableOpacity, ScrollView} from 'react-native';
-import styles from '../Styles';
+import styles from '../../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {MainContext} from '../components/main-context.js';
-import {LoadingModal, defaultPFP} from '../components/utilities';
+import {MainContext} from '../../components/main-context.js';
+import {LoadingModal, defaultPFP} from '../../components/utilities';
 
 // AWS APIs
-import * as queries from '../graphql/queries';
+import * as queries from '../../graphql/queries';
 import Amplify, {API} from 'aws-amplify';
 
 class Profile extends Component {

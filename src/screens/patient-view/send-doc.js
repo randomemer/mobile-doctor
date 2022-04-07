@@ -31,13 +31,13 @@ class SendDoc extends Component {
         this.state = {
             data: [],
             modalVisible: false,
+            refreshing: false,
             audioPath: this.props.route.params,
         };
-
-        this.loadDoctors();
     }
 
     loadDoctors = async () => {
+        this.setState({refreshing: true});
         try {
             const {data} = await API.graphql({
                 query: queries.listDoctors,
@@ -49,6 +49,7 @@ class SendDoc extends Component {
         } catch (error) {
             console.log(error);
         }
+        this.setState({refreshing: false});
     };
 
     handleSend = async index => {
@@ -150,9 +151,15 @@ class SendDoc extends Component {
                     data={this.state.data}
                     renderItem={this.card.bind(this)}
                     ItemSeparatorComponent={gap}
+                    refreshing={this.state.refreshing}
+                    onRefresh={this.loadDoctors}
                 />
             </SafeAreaView>
         );
+    }
+
+    componentDidMount() {
+        this.loadDoctors();
     }
 }
 

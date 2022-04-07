@@ -7,6 +7,11 @@ export const colors = {
     gainsboro: '#E6E6EA',
     pacificBlue: '#009FB7',
     pacificBlueDim: '#006f80',
+    yellowMunsel: '#F49F0A',
+    yellowMunselDim: '#ab6f07',
+    lightSeaGreen: '#00A6A6',
+    lightSeaGreenDim: '#007474',
+    purpureus: '#9D44B5',
 };
 
 const styles = StyleSheet.create({
@@ -71,6 +76,8 @@ const styles = StyleSheet.create({
         color: '#333',
         borderRadius: 10,
         alignItems: 'center',
+        // for all login inputs
+        alignSelf: 'stretch',
     },
     loginPasswordInput: {flex: 1, fontSize: 18, color: '#333'},
     inputFields: {
@@ -291,7 +298,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     rowTitleText: {
-        color: '#9D44B5',
+        color: colors.purpureus,
         fontSize: 20,
         textTransform: 'uppercase',
         fontWeight: 'bold',

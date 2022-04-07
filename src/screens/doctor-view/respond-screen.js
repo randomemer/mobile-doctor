@@ -7,6 +7,7 @@ import {
     Alert,
     ScrollView,
     ActivityIndicator,
+    Keyboard,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import styles from '../../Styles';
@@ -96,6 +97,7 @@ class RespondView extends Component {
     };
 
     confirmSend = () => {
+        Keyboard.dismiss();
         Alert.alert('Confirm Send', 'Do you want to submit this response?', [
             {
                 text: 'Cancel',
@@ -141,7 +143,9 @@ class RespondView extends Component {
     render() {
         return (
             <SafeAreaView style={styles.doctorResponseContainer}>
-                <ScrollView style={styles.doctorResponseScroll}>
+                <ScrollView
+                    style={styles.doctorResponseScroll}
+                    keyboardShouldPersistTaps={'handled'}>
                     <View style={styles.infoSection}>
                         <View style={styles.titleRow}>
                             <Icon

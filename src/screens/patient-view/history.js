@@ -10,8 +10,8 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {MainContext} from '../../components/main-context';
-import {extractTime} from '../../components/utilities';
-import styles from '../../Styles';
+import {extractTime, extractDateObject} from '../../components/utilities';
+import styles, {colors} from '../../Styles';
 
 // AWS APIs
 import * as queries from '../../graphql/queries';
@@ -36,7 +36,14 @@ class History extends Component {
                 authMode: 'API_KEY',
             });
             // console.log(data.listRecordings.items);
-            this.setState({interactions: data.listRecordings.items.reverse()});
+
+            const sort = data.listRecordings.items.sort((a, b) => {
+                const aDate = extractDateObject(a.timestamp);
+                const bDate = extractDateObject(b.timestamp);
+                return aDate < bDate;
+            });
+            this.setState({interactions: sort});
+            console.log(sort);
 
             extractTime(data.listRecordings.items[0].timestamp);
         } catch (error) {
@@ -48,8 +55,14 @@ class History extends Component {
     interactionCard(props) {
         const curStatus = props.item.comment === null ? 'Pending' : 'Reviewed';
 
-        const bgColor = curStatus === 'Pending' ? '#F49F0A' : '#00A6A6';
-        const activeBgColor = curStatus === 'Pending' ? '#ab6f07' : '#007474';
+        const bgColor =
+            curStatus === 'Pending'
+                ? colors.yellowMunsel
+                : colors.lightSeaGreen;
+        const activeBgColor =
+            curStatus === 'Pending'
+                ? colors.yellowMunselDim
+                : colors.lightSeaGreenDim;
 
         return (
             <TouchableHighlight
@@ -108,6 +121,7 @@ class History extends Component {
             this.state.interactions[index],
         );
     }
+
     componentDidMount() {
         // To make sure the context is not undefined before fetching results
         this.loadHistory();

@@ -15,7 +15,11 @@ import styles from '../../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {MainContext} from '../../components/main-context';
-import {extractTime, defaultPFP} from '../../components/utilities';
+import {
+    extractTime,
+    defaultPFP,
+    compareDates,
+} from '../../components/utilities';
 
 // AWS APIs
 import * as queries from '../../graphql/queries';
@@ -57,8 +61,18 @@ class DoctorHome extends Component {
             );
 
             this.sections = [
-                {title: 'Pending', data: pending.reverse()}, // change back to original order after modifying resolver in cloud
-                {title: 'Reviewed', data: reviewed.reverse()},
+                {
+                    title: 'Pending',
+                    data: pending.sort((a, b) =>
+                        compareDates(a.timestamp, b.timestamp),
+                    ),
+                }, // change back to original order after modifying resolver in cloud
+                {
+                    title: 'Reviewed',
+                    data: reviewed.sort((a, b) =>
+                        compareDates(a.timestamp, b.timestamp),
+                    ),
+                },
             ];
             // this.setState({dummyUpdateVar: !this.state.dummyUpdateVar});
         } catch (error) {

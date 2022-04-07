@@ -20,6 +20,21 @@ export function extractTime(string) {
     return new Date(year, month - 1, day, hrs, min, sec).toLocaleString();
 }
 
+export function extractDateObject(string) {
+    const [time, date] = string.split('-');
+
+    const [hrs, min, sec] = time.split('.');
+    const [day, month, year] = date.split('.');
+
+    return new Date(year, month - 1, day, hrs, min, sec);
+}
+
+export function compareDates(a, b) {
+    const aDate = extractDateObject(a);
+    const bDate = extractDateObject(b);
+    return aDate < bDate;
+}
+
 export class LoadingModal extends Component {
     constructor(props) {
         super(props);

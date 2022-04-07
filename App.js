@@ -21,8 +21,8 @@ import History from './src/screens/patient-view/history';
 import SendDoc from './src/screens/patient-view/send-doc';
 import HistoryDetails from './src/screens/patient-view/history-details';
 import LoginView from './src/screens/login';
-import Profile from './src/screens/profile';
-import EditProfile from './src/screens/edit-profile';
+import Profile from './src/screens/profile-view/profile';
+import EditProfile from './src/screens/profile-view/edit-profile';
 
 // AWS APIs
 import * as mutations from './src/graphql/mutations';
