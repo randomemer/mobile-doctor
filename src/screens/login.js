@@ -104,6 +104,8 @@ class LoginPane extends Component {
                     style={styles.loginInput}
                     onChangeText={text => this.setState({userText: text})}
                     returnKeyType={'next'}
+                    textContentType="emailAddress"
+                    autoComplete="email"
                 />
                 <PasswordInput
                     placeholder="Password"
@@ -236,6 +238,8 @@ class SignUpPane extends Component {
                     style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({firstName: text})}
                     returnKeyType={'next'}
+                    autoComplete="name"
+                    textContentType="givenName"
                 />
                 <TextInput
                     placeholder="Last Name"
@@ -243,6 +247,8 @@ class SignUpPane extends Component {
                     style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({lastName: text})}
                     returnKeyType={'next'}
+                    textContentType="familyName"
+                    autoComplete="name"
                 />
 
                 <TextInput
@@ -251,6 +257,8 @@ class SignUpPane extends Component {
                     style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({email: text})}
                     returnKeyType={'next'}
+                    textContentType="emailAddress"
+                    autoComplete="email"
                 />
 
                 <TextInput
@@ -259,9 +267,11 @@ class SignUpPane extends Component {
                     style={[styles.loginInput, styles.smoothShadow]}
                     onChangeText={text => this.setState({phone: text})}
                     returnKeyType={'next'}
+                    textContentType="telephoneNumber"
+                    autoComplete="tel"
                 />
 
-                <TextInput
+                <PasswordInput
                     placeholder="Password"
                     placeholderTextColor={'#aaa'}
                     secureTextEntry={true}
@@ -269,7 +279,7 @@ class SignUpPane extends Component {
                     onSubmitEditing={() =>
                         this.props.signUpCallback(this.state)
                     }
-                    style={[styles.loginInput, styles.smoothShadow]}
+                    style={styles.loginPasswordInput}
                 />
                 <Text
                     style={styles.forgotPwd}

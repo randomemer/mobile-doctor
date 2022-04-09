@@ -35,6 +35,16 @@ export function compareDates(a, b) {
     return aDate < bDate;
 }
 
+export function analyseBPM(bpm) {
+    if (bpm < 40) {
+        return 'Abnormally Low, Possible Bradycardia';
+    } else if (bpm > 100) {
+        return 'High BPM, If you are in resting condition, this could be Tachycardia';
+    } else {
+        return 'Normal BPM';
+    }
+}
+
 export class LoadingModal extends Component {
     constructor(props) {
         super(props);
@@ -62,12 +72,10 @@ export class PasswordInput extends Component {
         return (
             <View style={styles.loginInput}>
                 <TextInput
-                    placeholder={this.props.placeholder}
-                    placeholderTextColor={this.props.placeholderTextColor}
-                    secureTextEntry={this.state.hidePassword}
-                    onChangeText={text => this.props.onChangeText(text)}
-                    onSubmitEditing={() => this.props.onSubmitEditing()}
-                    style={this.props.style}></TextInput>
+                    {...this.props}
+                    textContentType={'password'}
+                    autoComplete={'password'}
+                />
                 <TouchableOpacity
                     onPress={() =>
                         this.setState({
