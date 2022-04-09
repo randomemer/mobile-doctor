@@ -5,9 +5,7 @@ import {
     Image,
     TouchableHighlight,
     FlatList,
-    Modal,
     Alert,
-    ActivityIndicator,
 } from 'react-native';
 import SimpleToast from 'react-native-simple-toast';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -15,13 +13,43 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../../Styles';
 import {useNavigation} from '@react-navigation/native';
 import {MainContext} from '../../components/main-context';
-import {defaultPFP} from '../../components/utilities';
+import {LoadingModal, defaultPFP} from '../../components/utilities';
 
 // Amplify and AWS API
 import {Storage} from '@aws-amplify/storage';
 import Amplify, {API} from 'aws-amplify';
 import * as mutations from '../../graphql/mutations';
 import * as queries from '../../graphql/queries';
+
+async function notifyMLModel(bucket_url, id) {
+    try {
+        const ip = '3.110.115.36';
+        const url = `http://${ip}/inference`;
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                s3_url: bucket_url,
+                email: id,
+            }),
+        });
+
+        // server response
+        if (!res.ok) {
+            console.log('Server ded : ', res);
+            return;
+        }
+
+        const jsonfile = await res.json();
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 
 class SendDoc extends Component {
     static contextType = MainContext;
@@ -64,12 +92,14 @@ class SendDoc extends Component {
             // Convert file to blob
             let file = await fetch(`file://${this.state.audioPath}`);
             file = await file.blob();
+
             // Send blob to AWS S3
             const res = await Storage.put(
                 `recordings/${userID}/${fileName}`,
                 file,
             );
             console.log(res);
+
             // put recording in database
             const recordingData = {
                 mail_id: userID,
@@ -87,6 +117,13 @@ class SendDoc extends Component {
                 authMode: 'API_KEY',
             });
             // console.log(response);
+
+            // Notify the ML model
+            await notifyMLModel(
+                `s3://mobile-doctor-app-storage25650-staging/public/${res.key}`,
+                userID,
+            );
+
             // Show modal dialog
             Alert.alert(
                 'Successfully Sent!',
@@ -140,11 +177,7 @@ class SendDoc extends Component {
 
         return (
             <SafeAreaView style={styles.docContainer}>
-                <Modal transparent={true} visible={this.state.modalVisible}>
-                    <View style={styles.modalBoxWrapper}>
-                        <ActivityIndicator size={'large'} color={'limegreen'} />
-                    </View>
-                </Modal>
+                <LoadingModal modalVisible={this.state.modalVisible} />
                 <FlatList
                     style={styles.cardList}
                     contentContainerStyle={styles.cardListContainer}

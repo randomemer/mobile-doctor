@@ -104,6 +104,14 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         alignSelf: 'flex-end',
     },
+    forgotPwdBack: {
+        width: 35,
+        height: 35,
+        borderRadius: 35,
+        marginBottom: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     doctorFields: {marginTop: 20},
     loginIcons: {},
     // RECORD SECTION

@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {Image, Text, View, Alert, TouchableHighlight} from 'react-native';
 import SimpleToast from 'react-native-simple-toast';
-import styles from './src/Styles';
+import styles, {colors} from './src/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {MainContext} from './src/components/main-context';
 
@@ -59,7 +59,7 @@ class HomeStackScreen extends Component {
                     options={{
                         title: 'Pick Your Doc',
                         headerStyle: {
-                            backgroundColor: '#ff5456',
+                            backgroundColor: colors.mainTheme,
                         },
                         headerTitleStyle: {color: '#fff'},
                     }}></HomeStack.Screen>
@@ -87,7 +87,7 @@ class DoctorHomeStackScreen extends Component {
                     options={{
                         title: 'Respond',
                         headerStyle: {
-                            backgroundColor: '#ff5456',
+                            backgroundColor: colors.mainTheme,
                         },
                         headerTitleStyle: {color: '#fff'},
                     }}
@@ -111,7 +111,7 @@ class HistoryStackScreen extends Component {
                     options={{
                         title: 'Previous Interactions',
                         headerStyle: {
-                            backgroundColor: '#ff5456',
+                            backgroundColor: colors.mainTheme,
                         },
                         headerTitleStyle: {color: '#fff'},
                     }}></HistoryStack.Screen>
@@ -121,7 +121,7 @@ class HistoryStackScreen extends Component {
                     options={{
                         title: 'Interaction Info',
                         headerStyle: {
-                            backgroundColor: '#ff5456',
+                            backgroundColor: colors.mainTheme,
                         },
                         headerTitleStyle: {color: '#fff'},
                     }}></HistoryStack.Screen>
@@ -318,6 +318,35 @@ class App extends Component {
         }
     };
 
+    initiatePasswdChange = async (username, changeState) => {
+        this.setState({loading: true});
+        try {
+            const response = await Auth.forgotPassword(username);
+            console.log(response);
+            changeState();
+        } catch (error) {
+            alert(error.message);
+        }
+        this.setState({loading: false});
+    };
+
+    completePasswordChange = async (username, otp, newPwd, reset) => {
+        this.setState({loading: true});
+        try {
+            const confirmation = await Auth.forgotPasswordSubmit(
+                username,
+                otp,
+                newPwd,
+            );
+            console.log(confirmation);
+            SimpleToast.show('Password Changed');
+            reset();
+        } catch (error) {
+            alert(error.message);
+        }
+        this.setState({loading: false});
+    };
+
     render() {
         const isDoc = this.context?.profile?.is_doctor;
         const screen = this.state.isLogged ? (
@@ -386,6 +415,8 @@ class App extends Component {
                 }
                 signUpInitiated={this.state.signUpInitiated}
                 isLoading={this.state.loading}
+                forgotPassword={this.initiatePasswdChange}
+                forgotPasswordSubmit={this.completePasswordChange}
             />
         );
 
@@ -437,7 +468,7 @@ class AppWrapper extends Component {
             });
             this.setState({prelogged: true, profile: data.getUser});
         } catch (error) {
-            console.log(error, typeof error);
+            console.log(error);
         }
         this.setState({loaded: true});
     };

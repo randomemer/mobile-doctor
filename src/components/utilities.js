@@ -87,5 +87,3 @@ export class PasswordInput extends Component {
         );
     }
 }
-
-// export PasswordInput();

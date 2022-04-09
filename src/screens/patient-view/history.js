@@ -43,7 +43,7 @@ class History extends Component {
                 return aDate < bDate;
             });
             this.setState({interactions: sort});
-            console.log(sort);
+            // console.log(sort);
 
             extractTime(data.listRecordings.items[0].timestamp);
         } catch (error) {

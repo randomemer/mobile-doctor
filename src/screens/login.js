@@ -8,6 +8,7 @@ import {
     Modal,
     ActivityIndicator,
     TouchableOpacity,
+    TouchableHighlight,
     Image,
 } from 'react-native';
 import styles, {colors} from '../Styles';
@@ -18,47 +19,148 @@ import {TabView} from 'react-native-tab-view';
 class LoginPane extends Component {
     constructor(props) {
         super(props);
-        this.state = {userText: '', pwdText: '', hidePassword: true};
+        this.state = {
+            userText: '',
+            pwdText: '',
+            hidePassword: true,
+            otp: '',
+            forgotPwd: false,
+            otpReceived: false,
+            newPwd: '',
+            confirmNewPwd: '',
+        };
 
         this.initialState = this.state;
     }
 
-    resetState() {
+    resetState = () => {
         console.log('Reset login tab');
         this.setState(this.initialState);
-    }
+    };
+
+    ForgotPasswordComponent = () => {
+        return (
+            <View style={styles.inputFields}>
+                <TouchableHighlight
+                    style={styles.forgotPwdBack}
+                    underlayColor="#ffaaab"
+                    onPress={() => {
+                        this.setState(this.initialState);
+                    }}>
+                    <Icon
+                        name="arrow-back"
+                        color={colors.mainTheme}
+                        size={30}
+                    />
+                </TouchableHighlight>
+                <TextInput
+                    placeholder="Email"
+                    placeholderTextColor={'#aaa'}
+                    style={styles.loginInput}
+                    onChangeText={text => this.setState({userText: text})}
+                    editable={!this.state.otpReceived}
+                    returnKeyType={'next'}
+                />
+                {this.state.otpReceived ? (
+                    <React.Fragment>
+                        <TextInput
+                            placeholder="One Time Password"
+                            placeholderTextColor={'#aaa'}
+                            style={styles.loginInput}
+                            onChangeText={text => this.setState({otp: text})}
+                            returnKeyType={'next'}
+                            editable={this.state.otpReceived}
+                        />
+                        <PasswordInput
+                            placeholder="New Password"
+                            placeholderTextColor={'#aaa'}
+                            onChangeText={text => this.setState({newPwd: text})}
+                            returnKeyType={'next'}
+                            style={styles.loginPasswordInput}
+                        />
+                        <PasswordInput
+                            placeholder="Confirm New Password"
+                            placeholderTextColor={'#aaa'}
+                            onChangeText={text =>
+                                this.setState({confirmNewPwd: text})
+                            }
+                            onSubmitEditing={() =>
+                                this.props.loginCallback(fields)
+                            }
+                            style={styles.loginPasswordInput}
+                        />
+                    </React.Fragment>
+                ) : undefined}
+            </View>
+        );
+    };
+
+    DefaultComponent = () => {
+        return (
+            <View style={styles.inputFields}>
+                <TextInput
+                    placeholder="Email"
+                    placeholderTextColor={'#aaa'}
+                    style={styles.loginInput}
+                    onChangeText={text => this.setState({userText: text})}
+                    returnKeyType={'next'}
+                />
+                <PasswordInput
+                    placeholder="Password"
+                    placeholderTextColor={'#aaa'}
+                    onChangeText={text => this.setState({pwdText: text})}
+                    onSubmitEditing={() => this.props.loginCallback(fields)}
+                    style={styles.loginPasswordInput}
+                />
+                <Text
+                    style={styles.forgotPwd}
+                    onPress={() =>
+                        this.setState({forgotPwd: !this.state.forgotPwd})
+                    }>
+                    Forgot Password?
+                </Text>
+            </View>
+        );
+    };
 
     render() {
+        const {userText, pwdText} = this.state;
+        const fields = {userText, pwdText};
+
+        const buttonText = this.state.otpReceived
+            ? 'RESET PASSWORD'
+            : this.state.forgotPwd
+            ? 'SEND OTP'
+            : 'LOGIN';
+
+        const callback = this.state.otpReceived
+            ? () =>
+                  this.props.forgotPasswordSubmitCallback(
+                      userText,
+                      this.state.otp,
+                      this.state.newPwd,
+                      this.state.confirmNewPwd,
+                      this.resetState,
+                  )
+            : this.state.forgotPwd
+            ? () =>
+                  this.props.forgotPasswordCallback(userText, () =>
+                      this.setState({otpReceived: true}),
+                  )
+            : () => this.props.loginCallback(fields);
+
         return (
             <View style={styles.loginArea}>
-                <View style={styles.inputFields}>
-                    <TextInput
-                        placeholder="Email"
-                        placeholderTextColor={'#aaa'}
-                        style={styles.loginInput}
-                        onChangeText={text => this.setState({userText: text})}
-                        returnKeyType={'next'}
-                    />
-                    <PasswordInput
-                        placeholder="Password"
-                        placeholderTextColor={'#aaa'}
-                        onChangeText={text => this.setState({pwdText: text})}
-                        onSubmitEditing={() =>
-                            this.props.loginCallback(this.state)
-                        }
-                        style={styles.loginPasswordInput}
-                    />
-                    <Text
-                        style={styles.forgotPwd}
-                        onPress={() => console.log('Get OTP')}>
-                        Forgot Password?
-                    </Text>
-                </View>
+                {this.state.forgotPwd ? (
+                    <this.ForgotPasswordComponent />
+                ) : (
+                    <this.DefaultComponent />
+                )}
                 <TouchableOpacity
                     activeOpacity={0.6}
-                    onPress={() => this.props.loginCallback(this.state)}
+                    onPress={callback}
                     style={styles.loginButton}>
-                    <Text style={styles.loginButtonText}>LOGIN</Text>
+                    <Text style={styles.loginButtonText}>{buttonText}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -249,7 +351,6 @@ class LoginView extends Component {
 
     handleLogin = loginFields => {
         console.log(loginFields);
-
         // Check all fields are filled
         const valid = Object.entries(loginFields).every(pair => pair[1] !== '');
         if (!valid) {
@@ -305,12 +406,51 @@ class LoginView extends Component {
         this.props.signUp(signUpData);
     };
 
+    handleForgotPassword = (username, changeState) => {
+        if (username === '') {
+            alert('Email cannot be empty');
+            return;
+        }
+
+        const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+        if (!emailReg.test(username)) {
+            alert('Invalid Email');
+            return;
+        }
+
+        this.props.forgotPassword(username, changeState);
+    };
+
+    handleForgotPasswordSubmit = (
+        username,
+        otp,
+        newPwd,
+        confirmNewPwd,
+        reset,
+    ) => {
+        if (otp === '' || newPwd === '' || confirmNewPwd === '') {
+            alert('Enter all fields');
+            return;
+        }
+
+        if (newPwd !== confirmNewPwd) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        this.props.forgotPasswordSubmit(username, otp, newPwd, reset);
+    };
+
     render() {
         const renderSceneFunc = ({route, jumpTo}) => {
             if (route.key === 'login') {
                 return (
                     <LoginPane
                         loginCallback={this.handleLogin}
+                        forgotPasswordCallback={this.handleForgotPassword}
+                        forgotPasswordSubmitCallback={
+                            this.handleForgotPasswordSubmit
+                        }
                         jumpTo={jumpTo}
                     />
                 );
