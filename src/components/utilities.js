@@ -75,6 +75,7 @@ export class PasswordInput extends Component {
                     {...this.props}
                     textContentType={'password'}
                     autoComplete={'password'}
+                    secureTextEntry={this.state.hidePassword}
                 />
                 <TouchableOpacity
                     onPress={() =>

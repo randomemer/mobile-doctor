@@ -197,7 +197,9 @@ class RespondView extends Component {
                                 name="fitness"
                                 style={styles.rowIcon}
                                 size={30}></Icon>
-                            <Text style={styles.rowTitleText}>BPM</Text>
+                            <Text style={styles.rowTitleText}>
+                                BPM (Approx.)
+                            </Text>
                         </View>
                         <Text style={styles.patientInfoText}>
                             {this.state.bpm || 'Not calculated yet'}

@@ -130,7 +130,12 @@ class Home extends Component {
     }
 
     startCountdown = async () => {
-        const dummy = await this.deleteRecording();
+        if (this.state.finishedRecording) {
+            const reply = await this.deleteRecording();
+            if (!reply) {
+                return;
+            }
+        }
         this.setState({countdown: 3, counting: true});
         for (let index = 0; index < 3; index++) {
             await timeout(1000);
@@ -314,9 +319,6 @@ class Home extends Component {
 
         AudioRecord.init(options);
         AudioRecord.start();
-        // AudioRecord.on('data', data => {
-        //     console.log(data);
-        // });
 
         this.timer = setInterval(() => {
             this.setState({recordTime: this.state.recordTime + 1});
@@ -406,7 +408,7 @@ class Home extends Component {
             // Ask confirmation
             this.res = await AsyncDeleteAlert();
             if (!this.res) {
-                return;
+                return false;
             }
             // Stop playing if already playing
             this.audioRecorderPlayer.removePlayBackListener();
@@ -417,10 +419,11 @@ class Home extends Component {
             );
             if (!exist) {
                 console.log('File does not exist.');
-                return;
+            } else {
+                await reactNativeFetchBlob.fs.unlink(this.state.audioPath);
             }
-            await reactNativeFetchBlob.fs.unlink(this.state.audioPath);
             this.setState(this.initialState);
+            return true;
         } catch (error) {
             console.log(error);
         }

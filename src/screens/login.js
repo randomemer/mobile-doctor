@@ -15,6 +15,7 @@ import styles, {colors} from '../Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {PasswordInput} from '../components/utilities';
 import {TabView} from 'react-native-tab-view';
+import ReactNativePhoneInput from 'react-native-phone-input';
 
 class LoginPane extends Component {
     constructor(props) {
@@ -189,6 +190,8 @@ class SignUpPane extends Component {
             expertise: '',
         };
         this.initialState = this.state;
+        this.phoneSelect = undefined;
+        this.clinicPhoneSelect = undefined;
     }
 
     resetState() {
@@ -206,12 +209,19 @@ class SignUpPane extends Component {
                     onChangeText={text => this.setState({clinic_name: text})}
                     returnKeyType={'next'}
                 />
-                <TextInput
-                    placeholder="Clinic/Hospital Phone"
-                    placeholderTextColor={'#aaa'}
+                <ReactNativePhoneInput
+                    ref={ref => (this.clinicPhoneSelect = ref)}
                     style={[styles.loginInput, styles.smoothShadow]}
-                    onChangeText={text => this.setState({clinic_phone: text})}
-                    returnKeyType={'next'}
+                    textStyle={styles.phonePickerText}
+                    textProps={{
+                        placeholder: 'Clinic/Hospital Phone',
+                        placeholderTextColor: '#aaa',
+                    }}
+                    pickerBackgroundColor="#333"
+                    autoFormat={true}
+                    onChangePhoneNumber={num =>
+                        this.setState({clinic_phone: num})
+                    }
                 />
                 <TextInput
                     placeholder="Years of experience"
@@ -262,17 +272,18 @@ class SignUpPane extends Component {
                     textContentType="emailAddress"
                     autoComplete="email"
                 />
-
-                <TextInput
-                    placeholder="Phone Number"
-                    placeholderTextColor={'#aaa'}
+                <ReactNativePhoneInput
+                    ref={ref => (this.phoneSelect = ref)}
                     style={[styles.loginInput, styles.smoothShadow]}
-                    onChangeText={text => this.setState({phone: text})}
-                    returnKeyType={'next'}
-                    textContentType="telephoneNumber"
-                    autoComplete="tel"
+                    textStyle={styles.phonePickerText}
+                    textProps={{
+                        placeholder: 'Phone Number',
+                        placeholderTextColor: '#aaa',
+                    }}
+                    pickerBackgroundColor="#333"
+                    autoFormat={true}
+                    onChangePhoneNumber={num => this.setState({phone: num})}
                 />
-
                 <PasswordInput
                     placeholder="Password"
                     placeholderTextColor={'#aaa'}
@@ -306,7 +317,7 @@ class SignUpPane extends Component {
             firstName: this.state.firstName,
             lastName: this.state.lastName,
             email: this.state.email,
-            phone: this.state.phone,
+            phone: this.phoneSelect?.getValue(),
             passwd: this.state.passwd,
             is_doctor: this.state.isDoctor,
         };
@@ -315,7 +326,7 @@ class SignUpPane extends Component {
             data = {
                 ...data,
                 clinic_name: this.state.clinic_name,
-                clinic_phone: this.state.clinic_phone,
+                clinic_phone: this.clinicPhoneSelect?.getValue(),
                 years: this.state.years,
                 expertise: this.state.expertise,
             };

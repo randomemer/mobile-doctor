@@ -78,7 +78,7 @@ class HistoryDetails extends Component {
                         <Text
                             style={
                                 styles.rowInfoText
-                            }>{`BPM : ${data.bpm}`}</Text>
+                            }>{`BPM (Approx.) : ${data.bpm}`}</Text>
                         <Text
                             style={
                                 styles.rowInfoText
