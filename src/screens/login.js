@@ -38,7 +38,7 @@ class LoginPane extends Component {
         this.setState(this.initialState);
     };
 
-    ForgotPasswordComponent = () => {
+    ForgotPasswordComponent = props => {
         return (
             <View style={styles.inputFields}>
                 <TouchableHighlight
@@ -85,7 +85,7 @@ class LoginPane extends Component {
                                 this.setState({confirmNewPwd: text})
                             }
                             onSubmitEditing={() =>
-                                this.props.loginCallback(fields)
+                                this.props.loginCallback(props.fields)
                             }
                             style={styles.loginPasswordInput}
                         />
@@ -95,7 +95,7 @@ class LoginPane extends Component {
         );
     };
 
-    DefaultComponent = () => {
+    DefaultComponent = props => {
         return (
             <View style={styles.inputFields}>
                 <TextInput
@@ -111,7 +111,9 @@ class LoginPane extends Component {
                     placeholder="Password"
                     placeholderTextColor={'#aaa'}
                     onChangeText={text => this.setState({pwdText: text})}
-                    onSubmitEditing={() => this.props.loginCallback(fields)}
+                    onSubmitEditing={() =>
+                        this.props.loginCallback(props.fields)
+                    }
                     style={styles.loginPasswordInput}
                 />
                 <Text
@@ -154,9 +156,9 @@ class LoginPane extends Component {
         return (
             <View style={styles.loginArea}>
                 {this.state.forgotPwd ? (
-                    <this.ForgotPasswordComponent />
+                    <this.ForgotPasswordComponent fields={fields} />
                 ) : (
-                    <this.DefaultComponent />
+                    <this.DefaultComponent fields={fields} />
                 )}
                 <TouchableOpacity
                     activeOpacity={0.6}

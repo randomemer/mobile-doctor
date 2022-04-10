@@ -27,7 +27,7 @@ import EditProfile from './src/screens/profile-view/edit-profile';
 // AWS APIs
 import * as mutations from './src/graphql/mutations';
 import * as queries from './src/graphql/queries';
-import Amplify, {Auth, API} from 'aws-amplify';
+import Amplify, {Auth, API, Storage} from 'aws-amplify';
 import awsconfig from './aws-exports.js';
 Amplify.configure(awsconfig);
 
@@ -434,7 +434,11 @@ class App extends Component {
             // Set the data in the Global React Context
             const tempObject = this.state.loggedUser;
             this.setState({loggedUser: null});
-            this.context.setContextCallback(tempObject, this.signOut);
+            this.context.setContextCallback(
+                this.context.ip,
+                tempObject,
+                this.signOut,
+            );
         }
     }
 }
@@ -446,31 +450,47 @@ class AppWrapper extends Component {
         this.state = {
             loaded: false,
             prelogged: false,
+            ip: '',
             profile: null,
             signOutCallback: undefined,
             setContextCallback: this.setContext,
         };
         this.heartIcon = require('./assets/heart-icon.png');
+
+        this.getServerIP();
         this.getLastUser();
     }
 
-    setContext = (prof, func) => {
-        this.setState({profile: prof, signOutCallback: func});
+    setContext = (ip, prof, func) => {
+        this.setState({ip: ip, profile: prof, signOutCallback: func});
     };
 
     getLastUser = async () => {
         try {
+            // Get user details
             const {attributes} = await Auth.currentAuthenticatedUser();
             const {data} = await API.graphql({
                 query: queries.getUser,
                 variables: {mail_id: attributes.email},
                 authMode: 'API_KEY',
             });
+
             this.setState({prelogged: true, profile: data.getUser});
         } catch (error) {
             console.log(error);
         }
         this.setState({loaded: true});
+    };
+
+    getServerIP = async () => {
+        try {
+            let file = await Storage.get('public.txt', {download: true});
+            const ip = await new Response(file.Body).text();
+
+            this.setState({ip: ip});
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     render() {

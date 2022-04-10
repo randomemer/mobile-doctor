@@ -21,12 +21,9 @@ import Amplify, {API} from 'aws-amplify';
 import * as mutations from '../../graphql/mutations';
 import * as queries from '../../graphql/queries';
 
-async function notifyMLModel(bucket_url, id) {
+async function notifyMLModel(server_url, bucket_url, id) {
     try {
-        const ip = '3.110.115.36';
-        const url = `http://${ip}/inference`;
-
-        const res = await fetch(url, {
+        const res = await fetch(server_url, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -120,6 +117,7 @@ class SendDoc extends Component {
 
             // Notify the ML model
             await notifyMLModel(
+                `http://${this.context.ip}/inference`,
                 `s3://mobile-doctor-app-storage25650-staging/public/${res.key}`,
                 userID,
             );
@@ -193,6 +191,7 @@ class SendDoc extends Component {
 
     componentDidMount() {
         this.loadDoctors();
+        console.log('IP : ', this.context.ip);
     }
 }
 
