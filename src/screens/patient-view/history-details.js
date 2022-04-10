@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import styles from '../../Styles';
-import {extractTime, defaultPFP} from '../../components/utilities';
+import {extractTime, defaultPFP, analyseBPM} from '../../components/utilities';
 
 class HistoryDetails extends Component {
     constructor(props) {
@@ -13,7 +13,7 @@ class HistoryDetails extends Component {
 
     render() {
         const data = this.props.route.params;
-        const responded = data.comment === null;
+        const responded = data.comment !== null;
         // console.log(data);
         return (
             <SafeAreaView style={styles.doctorResponseContainer}>
@@ -48,7 +48,7 @@ class HistoryDetails extends Component {
                             <Text style={styles.rowTitleText}>Status</Text>
                         </View>
                         <Text style={styles.rowInfoText}>
-                            {data.comment === null
+                            {!responded
                                 ? 'Waiting for response from your doctor'
                                 : 'Doctor has responded'}
                         </Text>
@@ -75,22 +75,31 @@ class HistoryDetails extends Component {
                                 Our Analysis
                             </Text>
                         </View>
-                        <Text style={styles.rowInfoText}>{`BPM : ${
-                            data.bpm
-                        }, Condition : ${''}`}</Text>
+                        <Text
+                            style={
+                                styles.rowInfoText
+                            }>{`BPM : ${data.bpm}`}</Text>
+                        <Text
+                            style={
+                                styles.rowInfoText
+                            }>{`Condition : ${analyseBPM(data.bpm)}`}</Text>
                     </View>
-                    <View style={styles.infoCard}>
-                        <View style={styles.titleRow}>
-                            <Icon
-                                name="chatbox"
-                                style={styles.rowIcon}
-                                size={30}></Icon>
-                            <Text style={styles.rowTitleText}>
-                                Doctor's Response
+                    {responded ? (
+                        <View style={styles.infoCard}>
+                            <View style={styles.titleRow}>
+                                <Icon
+                                    name="chatbox"
+                                    style={styles.rowIcon}
+                                    size={30}></Icon>
+                                <Text style={styles.rowTitleText}>
+                                    Doctor's Response
+                                </Text>
+                            </View>
+                            <Text style={styles.rowInfoText}>
+                                {data.comment}
                             </Text>
                         </View>
-                        <Text style={styles.rowInfoText}>{data.comment}</Text>
-                    </View>
+                    ) : undefined}
                 </ScrollView>
             </SafeAreaView>
         );
