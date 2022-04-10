@@ -130,6 +130,7 @@ class Home extends Component {
     }
 
     startCountdown = async () => {
+        const dummy = await this.deleteRecording();
         this.setState({countdown: 3, counting: true});
         for (let index = 0; index < 3; index++) {
             await timeout(1000);
