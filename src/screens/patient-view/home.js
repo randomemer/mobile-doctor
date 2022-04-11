@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import reactNativeFetchBlob from 'react-native-fetch-blob';
+import {timeout} from '../../components/utilities';
 
 async function askPerms() {
     if (Platform.OS === 'android') {
@@ -59,10 +60,6 @@ function SendButton(props) {
             <Icon name="send" size={24} color={'white'} />
         </TouchableHighlight>
     );
-}
-
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function AsyncDeleteAlert() {
@@ -306,8 +303,6 @@ class Home extends Component {
         const hash = `${curDate.getHours()}.${curDate.getMinutes()}.${curDate.getSeconds()}-${curDate.getDate()}.${
             curDate.getMonth() + 1
         }.${curDate.getFullYear()}`;
-        const path = `${musicFolder}/r-${hash}.wav`;
-        console.log(path);
 
         const options = {
             sampleRate: 44100, // default 44100

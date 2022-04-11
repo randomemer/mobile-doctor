@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../../Styles';
 import {useNavigation} from '@react-navigation/native';
 import {MainContext} from '../../components/main-context';
-import {LoadingModal, defaultPFP} from '../../components/utilities';
+import {LoadingModal, defaultPFP, timeout} from '../../components/utilities';
 
 // Amplify and AWS API
 import {Storage} from '@aws-amplify/storage';
@@ -23,6 +23,7 @@ import * as queries from '../../graphql/queries';
 
 async function notifyMLModel(server_url, bucket_url, id) {
     try {
+        console.log(server_url);
         const res = await fetch(server_url, {
             method: 'POST',
             headers: {
@@ -35,15 +36,18 @@ async function notifyMLModel(server_url, bucket_url, id) {
             }),
         });
 
+        // const j = await res.json();
+
         // server response
         if (!res.ok) {
-            console.log('Server ded : ', res);
-            return;
+            console.log(`Server Error ${res.status} : \n`, res);
+            // console.log(j);
+            return false;
         }
 
-        const jsonfile = await res.json();
+        return true;
     } catch (error) {
-        console.log(error);
+        console.log('Error connecting to server : \n', error);
         throw error;
     }
 }
@@ -80,21 +84,24 @@ class SendDoc extends Component {
     handleSend = async index => {
         this.setState({modalVisible: true});
         try {
-            console.log(this.state.data[index]);
+            let timer = timeout(15 * 1000);
+
             let fileName = this.state.audioPath.split('/');
             fileName = fileName[fileName.length - 1];
             const userID = this.context.profile.mail_id;
 
-            // console.log(userID.username, userID.attributes);
             // Convert file to blob
             let file = await fetch(`file://${this.state.audioPath}`);
             file = await file.blob();
 
             // Send blob to AWS S3
-            const res = await Storage.put(
-                `recordings/${userID}/${fileName}`,
-                file,
-            );
+            const res = await Promise.race([
+                Storage.put(`recordings/${userID}/${fileName}`, file),
+                timer,
+            ]);
+            if (!res) {
+                throw new Error('Request Timed out');
+            }
             console.log(res);
 
             // put recording in database
@@ -108,19 +115,35 @@ class SendDoc extends Component {
                 comment: null,
                 audio_length: null,
             };
-            const response = await API.graphql({
-                query: mutations.createRecording,
-                variables: {input: recordingData},
-                authMode: 'API_KEY',
-            });
-            // console.log(response);
+            const response = await Promise.race([
+                API.graphql({
+                    query: mutations.createRecording,
+                    variables: {input: recordingData},
+                    authMode: 'API_KEY',
+                }),
+                timer,
+            ]);
+            if (!response) {
+                throw new Error('Request Timed out');
+            }
+            console.log(response);
 
             // Notify the ML model
-            await notifyMLModel(
-                `http://${this.context.ip}/inference`,
-                `s3://mobile-doctor-app-storage25650-staging/public/${res.key}`,
-                userID,
-            );
+            const serverResponse = await Promise.race([
+                notifyMLModel(
+                    `http://${this.context.ip}/inference`,
+                    `s3://mobile-doctor-app-storage25650-staging/public/${res.key}`,
+                    userID,
+                ),
+                timer,
+            ]);
+            if (!serverResponse) {
+                throw new Error(`Failed to connect to server`);
+            }
+
+            if (timer) {
+                clearTimeout(timer);
+            }
 
             // Show modal dialog
             Alert.alert(
@@ -145,6 +168,7 @@ class SendDoc extends Component {
                 },
             );
         } catch (error) {
+            SimpleToast.show(error.message);
             console.log(error);
         }
         this.setState({modalVisible: false});

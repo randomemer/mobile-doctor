@@ -1,5 +1,13 @@
 import React, {Component} from 'react';
-import {Platform, Text, View, Image, FlatList, ScrollView} from 'react-native';
+import {
+    Platform,
+    Text,
+    View,
+    Image,
+    FlatList,
+    ScrollView,
+    Linking,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -14,6 +22,13 @@ class HistoryDetails extends Component {
     render() {
         const data = this.props.route.params;
         const responded = data.comment !== null;
+        let link;
+        if (data.bpm < 60) {
+            link =
+                'https://www.webmd.com/heart-disease/atrial-fibrillation/bradycardia';
+        } else if (data.bpm > 100) {
+            link = 'https://www.medicalnewstoday.com/articles/175241#symptoms';
+        }
         // console.log(data);
         return (
             <SafeAreaView style={styles.doctorResponseContainer}>
@@ -75,14 +90,22 @@ class HistoryDetails extends Component {
                                 Our Analysis
                             </Text>
                         </View>
-                        <Text
-                            style={
-                                styles.rowInfoText
-                            }>{`BPM (Approx.) : ${data.bpm}`}</Text>
-                        <Text
-                            style={
-                                styles.rowInfoText
-                            }>{`Condition : ${analyseBPM(data.bpm)}`}</Text>
+                        <Text style={styles.rowInfoText}>
+                            <Text>
+                                {`This is just a speculation. Consult a professional healthcare provider. For more info, refer `}
+                            </Text>
+                            <Text
+                                onPress={() => Linking.openURL(link)}
+                                style={{
+                                    textDecorationLine: 'underline',
+                                    color: 'blue',
+                                }}>
+                                {`this.\n`}
+                            </Text>
+                        </Text>
+                        <Text style={styles.rowInfoText}>
+                            {`${analyseBPM(data.bpm)}`}
+                        </Text>
                     </View>
                     {responded ? (
                         <View style={styles.infoCard}>

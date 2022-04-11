@@ -11,6 +11,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 export const defaultPFP = require('../../assets/default-pfp.jpg');
 
+export function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function extractTime(string) {
     const [time, date] = string.split('-');
 
@@ -37,9 +41,38 @@ export function compareDates(a, b) {
 
 export function analyseBPM(bpm) {
     if (bpm < 40) {
-        return 'Abnormally Low, Possible Bradycardia';
+        return `
+Normal heartbeat range is 60 to 100. But your heartbeat per min is ${bpm}.
+
+Possible causes : 
+• Congenital defect
+• Thyroid disease
+
+Do you expirence any of these symptoms? 
+• Lightheadedness or dizziness
+• Confusion or a hard time concentrating
+• Fainting
+• Shortness of breath (with or without chest pain)`;
     } else if (bpm > 100) {
-        return 'High BPM, If you are in resting condition, this could be Tachycardia';
+        return `
+Normal BPM is between 60 to 100. Your BPM is ${bpm}.
+
+Possible causes :
+
+• Physical or mental stress including illness and anxiety.
+• Hypertension or high blood pressure.
+• Electrolyte imbalance.
+• congenital irregularities of the heart
+• Excess amount of alcohol or caffiene.
+• Using recreational drugs (like cocaine)
+
+Do you experience any of these symtomps? 
+
+• Fainting
+• Sudden weakness
+• a loss of consciousness
+• Chest pain
+• shortness of breath`;
     } else {
         return 'Normal BPM';
     }

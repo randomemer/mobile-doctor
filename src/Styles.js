@@ -325,6 +325,7 @@ const styles = StyleSheet.create({
         color: '#333',
         fontSize: 18,
     },
+    analysisText: {},
     // *************************
     // ******* PROFILE *********
     // *************************

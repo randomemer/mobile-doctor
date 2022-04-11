@@ -433,6 +433,7 @@ class App extends Component {
         if (this.state.loggedUser !== null) {
             // Set the data in the Global React Context
             const tempObject = this.state.loggedUser;
+            // console.log('Context when app mounted : \n', this.context);
             this.setState({loggedUser: null});
             this.context.setContextCallback(
                 this.context.ip,
@@ -477,7 +478,7 @@ class AppWrapper extends Component {
 
             this.setState({prelogged: true, profile: data.getUser});
         } catch (error) {
-            console.log(error);
+            console.log('Error logging in :\n', error);
         }
         this.setState({loaded: true});
     };
@@ -485,11 +486,13 @@ class AppWrapper extends Component {
     getServerIP = async () => {
         try {
             let file = await Storage.get('public.txt', {download: true});
+            // console.log(file);
             const ip = await new Response(file.Body).text();
+            // console.log(ip);
 
             this.setState({ip: ip});
         } catch (error) {
-            console.log(error);
+            console.log('Error getting Server IP : \n', error);
         }
     };
 
