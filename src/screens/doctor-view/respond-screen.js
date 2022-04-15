@@ -175,7 +175,9 @@ class RespondView extends Component {
                                 name="mic"
                                 style={styles.rowIcon}
                                 size={30}></Icon>
-                            <Text style={styles.rowTitleText}>Recording</Text>
+                            <Text style={styles.rowTitleText}>
+                                Denoised Recording
+                            </Text>
                         </View>
                         <this.Player />
                     </View>

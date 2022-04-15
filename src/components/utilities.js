@@ -74,7 +74,7 @@ Do you experience any of these symtomps?
 • Chest pain
 • shortness of breath`;
     } else {
-        return 'Normal BPM';
+        return `Normal BPM : ${bpm}`;
     }
 }
 

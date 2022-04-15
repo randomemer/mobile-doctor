@@ -175,6 +175,7 @@ class SendDoc extends Component {
     };
 
     card(props) {
+        console.log(props.item);
         return (
             <TouchableHighlight
                 style={styles.card}

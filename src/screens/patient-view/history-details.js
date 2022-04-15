@@ -100,7 +100,7 @@ class HistoryDetails extends Component {
                                     textDecorationLine: 'underline',
                                     color: 'blue',
                                 }}>
-                                {`this.\n`}
+                                {`this article.\n`}
                             </Text>
                         </Text>
                         <Text style={styles.rowInfoText}>
